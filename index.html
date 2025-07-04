@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Coffee Shop Mini App</title>
-  https://telegram.org/js/telegram-web-app.js
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,13 +11,51 @@
       background-color: #f8f8f8;
       color: #333;
     }
+
     h1 {
       color: #6f4e37;
+    }
+
+    #closeBtn {
+      background-color: #6f4e37;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #username {
+      margin-top: 10px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <h1>Welcome to the Coffee Shop!</h1>
   <p>Start browsing our menu and place your order.</p>
+  <p id="username"></p>
+
+  <button id="closeBtn">Close App</button>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+
+    // Expand the mini app to full screen
+    tg.expand();
+
+    // Show user's first name if available
+    if (tg.initDataUnsafe.user) {
+      const name = tg.initDataUnsafe.user.first_name;
+      document.getElementById("username").innerText = "Hello, " + name + "!";
+    }
+
+    // Close the app on button click
+    document.getElementById("closeBtn").addEventListener("click", () => {
+      tg.close();
+    });
+  </script>
 </body>
 </html>
