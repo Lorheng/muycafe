@@ -1,61 +1,488 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Coffee Shop Mini App</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f8f8f8;
-      color: #333;
-    }
-
-    h1 {
-      color: #6f4e37;
-    }
-
-    #closeBtn {
-      background-color: #6f4e37;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      margin-top: 20px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    #username {
-      margin-top: 10px;
-      font-weight: bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MUY Café</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter for a clean, modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Telegram Web App script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        /* Use the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; /* bg-slate-100 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8; /* bg-slate-400 */
+            border-radius: 2px;
+        }
+        /* Transitions for modals */
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        /* Styling for active option buttons */
+        .option-btn.active {
+            background-color: #2563eb; /* bg-blue-600 */
+            color: white;
+            border-color: #2563eb;
+        }
+    </style>
 </head>
-<body>
-  <h1>Welcome to the Coffee Shop!</h1>
-  <p>Start browsing our menu and place your order.</p>
-  <p id="username"></p>
+<body class="bg-gray-100 text-gray-800 overflow-x-hidden">
 
-  <button id="closeBtn">Close App</button>
+    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-32">
+        
+        <!-- Header -->
+        <header class="text-center p-6">
+            <h1 class="text-3xl font-bold tracking-tight text-blue-600">MUY Café</h1>
+            <p class="text-gray-500 mt-1">Freshly brewed, just for you.</p>
+        </header>
 
-  <script>
-    const tg = window.Telegram.WebApp;
+        <!-- Category Tabs -->
+        <nav class="sticky top-0 bg-gray-100/80 backdrop-blur-sm z-10 px-4 py-3">
+            <div class="flex justify-center border border-gray-200 rounded-full p-1 max-w-xs mx-auto">
+                <button id="drinks-tab" class="tab-button w-1/2 rounded-full p-2 text-sm font-semibold transition-colors">Drinks</button>
+                <button id="food-tab" class="tab-button w-1/2 rounded-full p-2 text-sm font-semibold transition-colors">Food</button>
+            </div>
+        </nav>
 
-    // Expand the mini app to full screen
-    tg.expand();
+        <!-- Menu Items Container -->
+        <main class="px-4 mt-6">
+            <div id="drinks-section" class="space-y-4"></div>
+            <div id="food-section" class="space-y-4 hidden"></div>
+        </main>
+    </div>
 
-    // Show user's first name if available
-    if (tg.initDataUnsafe.user) {
-      const name = tg.initDataUnsafe.user.first_name;
-      document.getElementById("username").innerText = "Hello, " + name + "!";
-    }
+    <!-- Floating Cart Bar -->
+    <div id="cart-bar" class="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white border-t border-gray-200 p-4 transform translate-y-full shadow-[0_-2px_10px_rgba(0,0,0,0.05)]" style="transition: transform 0.3s ease-in-out;">
+        <div class="flex justify-between items-center">
+            <div>
+                <p id="cart-summary" class="font-semibold text-gray-800">Your Order</p>
+                <p id="cart-total" class="text-sm text-gray-500">Add items to get started</p>
+            </div>
+            <button id="view-cart-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-full transition-colors">
+                View Cart
+            </button>
+        </div>
+    </div>
+    
+    <!-- Base Modal Structure (for all popups) -->
+    <div id="modal-backdrop" class="modal fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40 hidden opacity-0"></div>
 
-    // Close the app on button click
-    document.getElementById("closeBtn").addEventListener("click", () => {
-      tg.close();
-    });
-  </script>
+    <!-- Customization Modal -->
+    <div id="customization-modal" class="modal fixed inset-0 z-50 hidden flex items-end">
+        <div id="customization-modal-content" class="modal-content w-full bg-gray-100 rounded-t-2xl p-4 flex flex-col transform translate-y-full max-w-lg mx-auto">
+            <!-- Modal content will be injected by JS -->
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="modal fixed inset-0 z-50 hidden flex items-end">
+        <div id="cart-modal-content" class="modal-content w-full bg-gray-100 rounded-t-2xl p-4 max-h-[80vh] flex flex-col transform translate-y-full max-w-lg mx-auto">
+            <!-- Header -->
+            <div class="flex justify-between items-center pb-3 border-b border-gray-200 flex-shrink-0">
+                <h2 class="text-xl font-bold">Your Cart</h2>
+                <button class="close-modal-btn text-gray-500 hover:text-gray-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <!-- Items -->
+            <div id="cart-items-container" class="flex-grow overflow-y-auto my-4 space-y-3"></div>
+            <!-- Footer -->
+            <div class="flex-shrink-0 pt-4 border-t border-gray-200">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-medium">Total</span>
+                    <span id="modal-total-price" class="text-2xl font-bold text-blue-600">$0.00</span>
+                </div>
+                <button id="checkout-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
+                    Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receipt-modal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div id="receipt-modal-content" class="modal-content w-full bg-white rounded-2xl p-6 flex flex-col transform scale-95 opacity-0 max-w-sm mx-auto shadow-2xl">
+            <div class="text-center mb-4">
+                <svg class="w-16 h-16 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h2 class="text-2xl font-bold mt-2">Order Successful!</h2>
+                <p class="text-gray-500 text-sm">Here is your receipt.</p>
+            </div>
+            <div id="receipt-items-container" class="flex-grow overflow-y-auto my-4 space-y-2 border-t border-b border-dashed py-4"></div>
+            <div class="flex-shrink-0">
+                <div class="flex justify-between items-center font-bold text-lg mb-4">
+                    <span>Total</span>
+                    <span id="receipt-total-price">$0.00</span>
+                </div>
+                <button id="new-order-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
+                    Place New Order
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA ---
+            const defaultDrinkIcon = 'https://img.icons8.com/3d-fluency/94/coffee-to-go.png';
+            const menu = {
+                drinks: [
+                    { id: 'd1', name: 'Iced Americano', description: 'Rich espresso shots over ice.', price: 3.50, image: defaultDrinkIcon, type: 'drink' },
+                    { id: 'd2', name: 'Caramel Macchiato', description: 'Creamy milk, vanilla, and espresso.', price: 4.75, image: defaultDrinkIcon, type: 'drink' },
+                    { id: 'd3', name: 'Matcha Latte', description: 'Earthy green tea with steamed milk.', price: 5.00, image: defaultDrinkIcon, type: 'drink' },
+                    { id: 'd4', name: 'Passionfruit Cooler', description: 'A refreshing tropical blend.', price: 4.25, image: defaultDrinkIcon, type: 'drink' },
+                ],
+                food: [
+                    { id: 'f1', name: 'Almond Croissant', description: 'Flaky pastry with almond filling.', price: 3.75, image: 'https://img.icons8.com/3d-fluency/94/croissant.png', type: 'food' },
+                    { id: 'f2', name: 'Avocado Toast', description: 'Sourdough with fresh avocado.', price: 8.50, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/avocado-sandwich-6624255-5506264.png', type: 'food' },
+                    { id: 'f3', name: 'Chocolate Chip Cookie', description: 'Classic, soft, and chewy.', price: 2.50, image: 'https://img.icons8.com/3d-fluency/94/cookie.png', type: 'food' },
+                    { id: 'f4', name: 'Breakfast Burrito', description: 'Eggs, cheese, and salsa.', price: 7.00, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/burrito-6292520-5145326.png', type: 'food' },
+                ]
+            };
+            const customizationOptions = {
+                sugar: ['100%', '75%', '50%', '25%', '0%'],
+                ice: ['100%', '50%', '0%', 'No Ice']
+            };
+
+            // --- STATE ---
+            let cart = []; // Array of cart item objects
+            let currentTab = 'drinks';
+
+            // --- DOM ELEMENTS ---
+            const backdrop = document.getElementById('modal-backdrop');
+            const allModals = document.querySelectorAll('.modal');
+            const drinksTab = document.getElementById('drinks-tab');
+            const foodTab = document.getElementById('food-tab');
+            const drinksSection = document.getElementById('drinks-section');
+            const foodSection = document.getElementById('food-section');
+            const cartBar = document.getElementById('cart-bar');
+            const cartSummary = document.getElementById('cart-summary');
+            const cartTotal = document.getElementById('cart-total');
+            const viewCartBtn = document.getElementById('view-cart-btn');
+            
+            // Modals
+            const customizationModal = document.getElementById('customization-modal');
+            const cartModal = document.getElementById('cart-modal');
+            const receiptModal = document.getElementById('receipt-modal');
+
+            // Cart Elements
+            const cartItemsContainer = document.getElementById('cart-items-container');
+            const modalTotalPrice = document.getElementById('modal-total-price');
+            const checkoutBtn = document.getElementById('checkout-btn');
+
+            // Receipt Elements
+            const receiptItemsContainer = document.getElementById('receipt-items-container');
+            const receiptTotalPrice = document.getElementById('receipt-total-price');
+            const newOrderBtn = document.getElementById('new-order-btn');
+
+            // --- GENERAL MODAL FUNCTIONS ---
+            const openModal = (modal) => {
+                backdrop.classList.remove('hidden');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    backdrop.classList.remove('opacity-0');
+                    const content = modal.querySelector('.modal-content');
+                    if(content) {
+                       content.classList.remove('translate-y-full', 'scale-95', 'opacity-0');
+                    }
+                }, 10);
+            };
+
+            const closeModal = (modal) => {
+                backdrop.classList.add('opacity-0');
+                const content = modal.querySelector('.modal-content');
+                if(content) {
+                    if (modal.id === 'receipt-modal') {
+                        content.classList.add('scale-95', 'opacity-0');
+                    } else {
+                        content.classList.add('translate-y-full');
+                    }
+                }
+                
+                setTimeout(() => {
+                    backdrop.classList.add('hidden');
+                    modal.classList.add('hidden');
+                }, 300);
+            };
+
+            // --- RENDER FUNCTIONS ---
+            const renderMenuItems = (category) => {
+                const section = category === 'drinks' ? drinksSection : foodSection;
+                const items = menu[category];
+                section.innerHTML = ''; 
+                items.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'bg-white rounded-xl p-3 flex items-center space-x-4 border border-gray-200';
+                    const placeholderUrl = `https://placehold.co/80x80/e0f2fe/0c4a6e?text=${item.name.split(' ').map(w=>w[0]).join('')}`;
+                    
+                    itemElement.innerHTML = `
+                        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 rounded-lg object-contain flex-shrink-0" onerror="this.onerror=null; this.src='${placeholderUrl}';">
+                        <div class="flex-grow">
+                            <h3 class="font-semibold text-gray-800">${item.name}</h3>
+                            <p class="text-sm text-gray-500">${item.description}</p>
+                            <p class="font-bold text-blue-600 mt-2">$${item.price.toFixed(2)}</p>
+                        </div>
+                        <button data-item-id="${item.id}" class="add-item-btn bg-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-light hover:bg-blue-700 transition-transform active:scale-90">
+                            +
+                        </button>
+                    `;
+                    section.appendChild(itemElement);
+                });
+            };
+
+            const renderCart = () => {
+                cartItemsContainer.innerHTML = '';
+                const { totalPrice } = getCartTotals();
+
+                if (cart.length === 0) {
+                    cartItemsContainer.innerHTML = `<p class="text-center text-gray-500">Your cart is empty.</p>`;
+                } else {
+                    cart.forEach(item => {
+                        const cartItemEl = document.createElement('div');
+                        cartItemEl.className = 'flex items-center bg-white p-2 rounded-lg';
+                        let detailsHtml = '';
+                        if (item.customizations) {
+                            detailsHtml = `<p class="text-xs text-gray-500">Sugar: ${item.customizations.sugar}, Ice: ${item.customizations.ice}</p>`;
+                        }
+
+                        cartItemEl.innerHTML = `
+                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-md object-contain">
+                            <div class="flex-grow mx-3">
+                                <p class="font-semibold">${item.name}</p>
+                                ${detailsHtml}
+                            </div>
+                            <div class="text-right">
+                                <p class="font-semibold">$${item.price.toFixed(2)}</p>
+                                <button data-cart-item-id="${item.cartItemId}" class="remove-from-cart-btn text-xs text-red-500 hover:text-red-700">Remove</button>
+                            </div>
+                        `;
+                        cartItemsContainer.appendChild(cartItemEl);
+                    });
+                }
+                modalTotalPrice.textContent = `$${totalPrice.toFixed(2)}`;
+            };
+
+            const renderReceipt = () => {
+                receiptItemsContainer.innerHTML = '';
+                const { totalPrice } = getCartTotals();
+                cart.forEach(item => {
+                    const receiptItemEl = document.createElement('div');
+                    receiptItemEl.className = 'flex justify-between items-center text-sm';
+                    let detailsHtml = '';
+                    if (item.customizations) {
+                        detailsHtml = `<span class="text-xs text-gray-400 block">(${item.customizations.sugar} Sugar, ${item.customizations.ice} Ice)</span>`;
+                    }
+                    receiptItemEl.innerHTML = `
+                        <div>
+                            <p class="font-medium">${item.name}</p>
+                            ${detailsHtml}
+                        </div>
+                        <p class="font-medium">$${item.price.toFixed(2)}</p>
+                    `;
+                    receiptItemsContainer.appendChild(receiptItemEl);
+                });
+                receiptTotalPrice.textContent = `$${totalPrice.toFixed(2)}`;
+            };
+
+            // --- CART LOGIC ---
+            const getCartTotals = () => {
+                const totalItems = cart.length;
+                const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+                return { totalItems, totalPrice };
+            };
+
+            const updateCartBar = () => {
+                const { totalItems, totalPrice } = getCartTotals();
+                if (totalItems === 0) {
+                    cartBar.style.transform = 'translateY(100%)';
+                } else {
+                    cartSummary.textContent = `${totalItems} item${totalItems > 1 ? 's' : ''} in cart`;
+                    cartTotal.textContent = `Total: $${totalPrice.toFixed(2)}`;
+                    cartBar.style.transform = 'translateY(0)';
+                }
+            };
+
+            const addToCart = (item, customizations = null) => {
+                const cartItem = {
+                    ...item,
+                    cartItemId: `cart-${Date.now()}-${Math.random()}`,
+                    customizations
+                };
+                cart.push(cartItem);
+                updateCartBar();
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                }
+            };
+
+            const removeFromCart = (cartItemId) => {
+                cart = cart.filter(item => item.cartItemId !== cartItemId);
+                updateCartBar();
+                renderCart();
+            };
+
+            // --- CUSTOMIZATION MODAL ---
+            const openCustomizationModal = (item) => {
+                let selectedSugar = '100%';
+                let selectedIce = '100%';
+
+                customizationModalContent.innerHTML = `
+                    <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                        <h2 class="text-xl font-bold">${item.name}</h2>
+                        <button class="close-modal-btn text-gray-500 hover:text-gray-800">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <div class="my-4 space-y-4">
+                        <div>
+                            <h3 class="font-semibold mb-2">Sugar Level</h3>
+                            <div id="sugar-options" class="flex flex-wrap gap-2">
+                                ${customizationOptions.sugar.map(opt => `<button data-value="${opt}" class="option-btn sugar-option border border-gray-300 rounded-full px-4 py-1 text-sm">${opt}</button>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold mb-2">Ice Level</h3>
+                            <div id="ice-options" class="flex flex-wrap gap-2">
+                                ${customizationOptions.ice.map(opt => `<button data-value="${opt}" class="option-btn ice-option border border-gray-300 rounded-full px-4 py-1 text-sm">${opt}</button>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    <button id="confirm-add-item-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
+                        Add to Cart - $${item.price.toFixed(2)}
+                    </button>
+                `;
+
+                const sugarOptions = customizationModalContent.querySelector('#sugar-options');
+                const iceOptions = customizationModalContent.querySelector('#ice-options');
+
+                sugarOptions.querySelector(`[data-value="${selectedSugar}"]`).classList.add('active');
+                iceOptions.querySelector(`[data-value="${selectedIce}"]`).classList.add('active');
+
+                sugarOptions.addEventListener('click', e => {
+                    if (e.target.classList.contains('sugar-option')) {
+                        sugarOptions.querySelector('.active').classList.remove('active');
+                        e.target.classList.add('active');
+                        selectedSugar = e.target.dataset.value;
+                    }
+                });
+                iceOptions.addEventListener('click', e => {
+                    if (e.target.classList.contains('ice-option')) {
+                        iceOptions.querySelector('.active').classList.remove('active');
+                        e.target.classList.add('active');
+                        selectedIce = e.target.dataset.value;
+                    }
+                });
+                
+                customizationModalContent.querySelector('#confirm-add-item-btn').addEventListener('click', () => {
+                    addToCart(item, { sugar: selectedSugar, ice: selectedIce });
+                    closeModal(customizationModal);
+                });
+
+                openModal(customizationModal);
+            };
+
+            // --- EVENT LISTENERS ---
+            const switchTab = (newTab) => {
+                currentTab = newTab;
+                if (newTab === 'drinks') {
+                    drinksTab.classList.add('bg-blue-600', 'text-white');
+                    drinksTab.classList.remove('text-gray-500');
+                    foodTab.classList.add('text-gray-500');
+                    foodTab.classList.remove('bg-blue-600', 'text-white');
+                    drinksSection.classList.remove('hidden');
+                    foodSection.classList.add('hidden');
+                } else {
+                    foodTab.classList.add('bg-blue-600', 'text-white');
+                    foodTab.classList.remove('text-gray-500');
+                    drinksTab.classList.add('text-gray-500');
+                    drinksTab.classList.remove('bg-blue-600', 'text-white');
+                    foodSection.classList.remove('hidden');
+                    drinksSection.classList.add('hidden');
+                }
+            };
+            
+            drinksTab.addEventListener('click', () => switchTab('drinks'));
+            foodTab.addEventListener('click', () => switchTab('food'));
+            viewCartBtn.addEventListener('click', () => {
+                renderCart();
+                openModal(cartModal);
+            });
+            
+            checkoutBtn.addEventListener('click', () => {
+                 if (cart.length > 0) {
+                    closeModal(cartModal);
+                    renderReceipt();
+                    openModal(receiptModal);
+                 }
+            });
+
+            newOrderBtn.addEventListener('click', () => {
+                closeModal(receiptModal);
+                cart = [];
+                updateCartBar();
+            });
+
+            document.body.addEventListener('click', (e) => {
+                if (e.target.closest('.add-item-btn')) {
+                    const itemId = e.target.closest('.add-item-btn').dataset.itemId;
+                    const allItems = [...menu.drinks, ...menu.food];
+                    const item = allItems.find(i => i.id === itemId);
+                    if (item.type === 'drink') {
+                        openCustomizationModal(item);
+                    } else {
+                        addToCart(item);
+                    }
+                }
+                if (e.target.closest('.remove-from-cart-btn')) {
+                    const cartItemId = e.target.closest('.remove-from-cart-btn').dataset.cartItemId;
+                    removeFromCart(cartItemId);
+                }
+                if (e.target.closest('.close-modal-btn')) {
+                    closeModal(e.target.closest('.modal'));
+                }
+            });
+
+            backdrop.addEventListener('click', () => {
+                allModals.forEach(modal => {
+                    if (!modal.classList.contains('hidden')) {
+                        closeModal(modal);
+                    }
+                });
+            });
+
+            // --- INITIALIZATION ---
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.setHeaderColor('#F3F4F6');
+                Telegram.WebApp.setBackgroundColor('#F3F4F6');
+            }
+
+            renderMenuItems('drinks');
+            renderMenuItems('food');
+            switchTab('drinks');
+        });
+    </script>
+
 </body>
 </html>
