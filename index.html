@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>MUY Café</title>
     
     <!-- Tailwind CSS for styling -->
@@ -44,6 +44,9 @@
             background-color: #2563eb; /* bg-blue-600 */
             color: white;
             border-color: #2563eb;
+        }
+        .menu-item-card {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -146,6 +149,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- DATA ---
             const defaultDrinkIcon = 'https://img.icons8.com/3d-fluency/94/coffee-to-go.png';
+            const defaultFoodIcon = 'https://img.icons8.com/3d-fluency/94/croissant.png';
             const menu = {
                 drinks: [
                     { id: 'd1', name: 'Iced Americano', description: 'Rich espresso shots over ice.', price: 3.50, image: defaultDrinkIcon, type: 'drink' },
@@ -154,10 +158,10 @@
                     { id: 'd4', name: 'Passionfruit Cooler', description: 'A refreshing tropical blend.', price: 4.25, image: defaultDrinkIcon, type: 'drink' },
                 ],
                 food: [
-                    { id: 'f1', name: 'Almond Croissant', description: 'Flaky pastry with almond filling.', price: 3.75, image: 'https://img.icons8.com/3d-fluency/94/croissant.png', type: 'food' },
-                    { id: 'f2', name: 'Avocado Toast', description: 'Sourdough with fresh avocado.', price: 8.50, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/avocado-sandwich-6624255-5506264.png', type: 'food' },
-                    { id: 'f3', name: 'Chocolate Chip Cookie', description: 'Classic, soft, and chewy.', price: 2.50, image: 'https://img.icons8.com/3d-fluency/94/cookie.png', type: 'food' },
-                    { id: 'f4', name: 'Breakfast Burrito', description: 'Eggs, cheese, and salsa.', price: 7.00, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/burrito-6292520-5145326.png', type: 'food' },
+                    { id: 'f1', name: 'Almond Croissant', description: 'Flaky pastry with almond filling.', price: 3.75, image: defaultFoodIcon, type: 'food' },
+                    { id: 'f2', name: 'Avocado Toast', description: 'Sourdough with fresh avocado.', price: 8.50, image: defaultFoodIcon, type: 'food' },
+                    { id: 'f3', name: 'Chocolate Chip Cookie', description: 'Classic, soft, and chewy.', price: 2.50, image: defaultFoodIcon, type: 'food' },
+                    { id: 'f4', name: 'Breakfast Burrito', description: 'Eggs, cheese, and salsa.', price: 7.00, image: defaultFoodIcon, type: 'food' },
                 ]
             };
             const customizationOptions = {
@@ -209,8 +213,10 @@
                 }, 10);
             };
 
-            const closeModal = (modal) => {
-                backdrop.classList.add('opacity-0');
+            const closeModal = (modal, keepBackdrop = false) => {
+                if (!keepBackdrop) {
+                    backdrop.classList.add('opacity-0');
+                }
                 const content = modal.querySelector('.modal-content');
                 if(content) {
                     if (modal.id === 'receipt-modal') {
@@ -221,7 +227,9 @@
                 }
                 
                 setTimeout(() => {
-                    backdrop.classList.add('hidden');
+                    if (!keepBackdrop) {
+                        backdrop.classList.add('hidden');
+                    }
                     modal.classList.add('hidden');
                 }, 300);
             };
@@ -233,19 +241,20 @@
                 section.innerHTML = ''; 
                 items.forEach(item => {
                     const itemElement = document.createElement('div');
-                    itemElement.className = 'bg-white rounded-xl p-3 flex items-center space-x-4 border border-gray-200';
+                    itemElement.className = 'menu-item-card bg-white rounded-xl p-3 flex items-center space-x-4 border border-gray-200 hover:shadow-md transition-shadow';
+                    itemElement.dataset.itemId = item.id;
                     const placeholderUrl = `https://placehold.co/80x80/e0f2fe/0c4a6e?text=${item.name.split(' ').map(w=>w[0]).join('')}`;
                     
                     itemElement.innerHTML = `
-                        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 rounded-lg object-contain flex-shrink-0" onerror="this.onerror=null; this.src='${placeholderUrl}';">
-                        <div class="flex-grow">
+                        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 rounded-lg object-contain flex-shrink-0 pointer-events-none" onerror="this.onerror=null; this.src='${placeholderUrl}';">
+                        <div class="flex-grow pointer-events-none">
                             <h3 class="font-semibold text-gray-800">${item.name}</h3>
                             <p class="text-sm text-gray-500">${item.description}</p>
                             <p class="font-bold text-blue-600 mt-2">$${item.price.toFixed(2)}</p>
                         </div>
-                        <button data-item-id="${item.id}" class="add-item-btn bg-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-light hover:bg-blue-700 transition-transform active:scale-90">
+                        <div class="bg-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-light pointer-events-none">
                             +
-                        </button>
+                        </div>
                     `;
                     section.appendChild(itemElement);
                 });
@@ -344,6 +353,7 @@
 
             // --- CUSTOMIZATION MODAL ---
             const openCustomizationModal = (item) => {
+                const customizationModalContent = document.getElementById('customization-modal-content');
                 let selectedSugar = '100%';
                 let selectedIce = '100%';
 
@@ -431,7 +441,7 @@
             
             checkoutBtn.addEventListener('click', () => {
                  if (cart.length > 0) {
-                    closeModal(cartModal);
+                    closeModal(cartModal, true); // Keep backdrop for chained modal
                     renderReceipt();
                     openModal(receiptModal);
                  }
@@ -444,8 +454,8 @@
             });
 
             document.body.addEventListener('click', (e) => {
-                if (e.target.closest('.add-item-btn')) {
-                    const itemId = e.target.closest('.add-item-btn').dataset.itemId;
+                if (e.target.closest('.menu-item-card')) {
+                    const itemId = e.target.closest('.menu-item-card').dataset.itemId;
                     const allItems = [...menu.drinks, ...menu.food];
                     const item = allItems.find(i => i.id === itemId);
                     if (item.type === 'drink') {
