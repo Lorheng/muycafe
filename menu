@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Coffee Shop Mini App</title>
+  https://telegram.org/js/telegram-web-app.js
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f8f8f8;
+      color: #333;
+    }
+    h1 {
+      color: #6f4e37;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to the Coffee Shop!</h1>
+  <p>Start browsing our menu and place your order.</p>
+</body>
+</html>
