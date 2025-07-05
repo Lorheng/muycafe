@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
     <title>MUY Café</title>
     
     <!-- Tailwind CSS for styling -->
@@ -48,11 +48,27 @@
         .menu-item-card {
             cursor: pointer;
         }
+        /* Fly-to-cart animation */
+        .fly-to-cart {
+            position: fixed;
+            z-index: 100;
+            transition: all 0.5s ease-in-out;
+            border-radius: 50%;
+        }
+        /* Search/Nav transition styles */
+        #nav-box.is-searching #tabs-container {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #nav-box.is-searching #search-bar-container {
+            opacity: 1;
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 overflow-x-hidden">
 
-    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-32">
+    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-48">
         
         <!-- Header -->
         <header class="text-center p-6">
@@ -60,11 +76,21 @@
             <p class="text-gray-500 mt-1">Freshly brewed, just for you.</p>
         </header>
 
-        <!-- Category Tabs -->
+        <!-- Category Tabs & Search -->
         <nav class="sticky top-0 bg-gray-100/80 backdrop-blur-sm z-10 px-4 py-3">
-            <div class="flex justify-center border border-gray-200 rounded-full p-1 max-w-xs mx-auto">
-                <button id="drinks-tab" class="tab-button w-1/2 rounded-full p-2 text-sm font-semibold transition-colors">Drinks</button>
-                <button id="food-tab" class="tab-button w-1/2 rounded-full p-2 text-sm font-semibold transition-colors">Food</button>
+            <div id="nav-box" class="relative flex justify-center border border-gray-200 rounded-full p-1 max-w-sm mx-auto h-12">
+                <div id="tabs-container" class="absolute inset-0 flex items-center w-full transition-opacity duration-300 opacity-100">
+                    <button id="drinks-tab" class="tab-button flex-grow rounded-full p-2 text-sm font-semibold transition-colors">Drinks</button>
+                    <button id="food-tab" class="tab-button flex-grow rounded-full p-2 text-sm font-semibold transition-colors">Food</button>
+                    <div class="border-l border-gray-200 h-6 mx-1"></div>
+                    <button id="search-icon-btn" class="p-2 rounded-full hover:bg-gray-200 flex-shrink-0">
+                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </button>
+                </div>
+                <div id="search-bar-container" class="absolute inset-0 flex items-center w-full transition-opacity duration-300 opacity-0 pointer-events-none">
+                    <input id="search-bar" type="text" placeholder="Search menu..." class="flex-grow bg-transparent focus:outline-none px-4 text-sm">
+                    <button id="close-search-btn" class="text-sm font-semibold text-blue-600 hover:text-blue-800 pr-4 flex-shrink-0">Cancel</button>
+                </div>
             </div>
         </nav>
 
@@ -72,11 +98,12 @@
         <main class="px-4 mt-6">
             <div id="drinks-section" class="space-y-4"></div>
             <div id="food-section" class="space-y-4 hidden"></div>
+            <div id="search-results-section" class="space-y-4 hidden"></div>
         </main>
     </div>
 
     <!-- Floating Cart Bar -->
-    <div id="cart-bar" class="fixed bottom-0 left-0 right-0 max-w-lg mx-auto bg-white border-t border-gray-200 p-4 transform translate-y-full shadow-[0_-2px_10px_rgba(0,0,0,0.05)]" style="transition: transform 0.3s ease-in-out;">
+    <div id="cart-bar" class="fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-white border border-gray-200 p-4 transform translate-y-full shadow-2xl rounded-2xl" style="transition: transform 0.3s ease-in-out;">
         <div class="flex justify-between items-center">
             <div>
                 <p id="cart-summary" class="font-semibold text-gray-800">Your Order</p>
@@ -101,25 +128,23 @@
     <!-- Cart Modal -->
     <div id="cart-modal" class="modal fixed inset-0 z-50 hidden flex items-end">
         <div id="cart-modal-content" class="modal-content w-full bg-gray-100 rounded-t-2xl p-4 max-h-[80vh] flex flex-col transform translate-y-full max-w-lg mx-auto">
-            <!-- Header -->
             <div class="flex justify-between items-center pb-3 border-b border-gray-200 flex-shrink-0">
                 <h2 class="text-xl font-bold">Your Cart</h2>
                 <button class="close-modal-btn text-gray-500 hover:text-gray-800">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <!-- Items -->
             <div id="cart-items-container" class="flex-grow overflow-y-auto my-4 space-y-3"></div>
-            <!-- Footer -->
-            <div class="flex-shrink-0 pt-4 border-t border-gray-200">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-lg font-medium">Total</span>
+            <div class="flex justify-between items-center mb-4 text-sm">
+                 <button id="empty-cart-btn" class="text-red-500 hover:text-red-700 font-semibold">Empty Cart</button>
+                 <div class="text-right">
+                    <span class="text-lg font-medium">Total:</span>
                     <span id="modal-total-price" class="text-2xl font-bold text-blue-600">$0.00</span>
                 </div>
-                <button id="checkout-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
-                    Proceed to Checkout
-                </button>
             </div>
+            <button id="checkout-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
+                Proceed to Checkout
+            </button>
         </div>
     </div>
 
@@ -159,9 +184,9 @@
                 ],
                 food: [
                     { id: 'f1', name: 'Almond Croissant', description: 'Flaky pastry with almond filling.', price: 3.75, image: defaultFoodIcon, type: 'food' },
-                    { id: 'f2', name: 'Avocado Toast', description: 'Sourdough with fresh avocado.', price: 8.50, image: defaultFoodIcon, type: 'food' },
-                    { id: 'f3', name: 'Chocolate Chip Cookie', description: 'Classic, soft, and chewy.', price: 2.50, image: defaultFoodIcon, type: 'food' },
-                    { id: 'f4', name: 'Breakfast Burrito', description: 'Eggs, cheese, and salsa.', price: 7.00, image: defaultFoodIcon, type: 'food' },
+                    { id: 'f2', name: 'Avocado Toast', description: 'Sourdough with fresh avocado.', price: 8.50, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/avocado-sandwich-6624255-5506264.png', type: 'food' },
+                    { id: 'f3', name: 'Chocolate Chip Cookie', description: 'Classic, soft, and chewy.', price: 2.50, image: 'https://img.icons8.com/3d-fluency/94/cookie.png', type: 'food' },
+                    { id: 'f4', name: 'Breakfast Burrito', description: 'Eggs, cheese, and salsa.', price: 7.00, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/burrito-6292520-5145326.png', type: 'food' },
                 ]
             };
             const customizationOptions = {
@@ -170,7 +195,7 @@
             };
 
             // --- STATE ---
-            let cart = []; // Array of cart item objects
+            let cart = []; 
             let currentTab = 'drinks';
 
             // --- DOM ELEMENTS ---
@@ -180,11 +205,18 @@
             const foodTab = document.getElementById('food-tab');
             const drinksSection = document.getElementById('drinks-section');
             const foodSection = document.getElementById('food-section');
+            const searchResultsSection = document.getElementById('search-results-section');
             const cartBar = document.getElementById('cart-bar');
             const cartSummary = document.getElementById('cart-summary');
             const cartTotal = document.getElementById('cart-total');
             const viewCartBtn = document.getElementById('view-cart-btn');
             
+            // Search & Nav elements
+            const navBox = document.getElementById('nav-box');
+            const searchIconBtn = document.getElementById('search-icon-btn');
+            const searchBar = document.getElementById('search-bar');
+            const closeSearchBtn = document.getElementById('close-search-btn');
+
             // Modals
             const customizationModal = document.getElementById('customization-modal');
             const cartModal = document.getElementById('cart-modal');
@@ -194,6 +226,7 @@
             const cartItemsContainer = document.getElementById('cart-items-container');
             const modalTotalPrice = document.getElementById('modal-total-price');
             const checkoutBtn = document.getElementById('checkout-btn');
+            const emptyCartBtn = document.getElementById('empty-cart-btn');
 
             // Receipt Elements
             const receiptItemsContainer = document.getElementById('receipt-items-container');
@@ -207,52 +240,43 @@
                 setTimeout(() => {
                     backdrop.classList.remove('opacity-0');
                     const content = modal.querySelector('.modal-content');
-                    if(content) {
-                       content.classList.remove('translate-y-full', 'scale-95', 'opacity-0');
-                    }
+                    if(content) content.classList.remove('translate-y-full', 'scale-95', 'opacity-0');
                 }, 10);
             };
 
             const closeModal = (modal, keepBackdrop = false) => {
-                if (!keepBackdrop) {
-                    backdrop.classList.add('opacity-0');
-                }
+                if (!keepBackdrop) backdrop.classList.add('opacity-0');
                 const content = modal.querySelector('.modal-content');
                 if(content) {
-                    if (modal.id === 'receipt-modal') {
-                        content.classList.add('scale-95', 'opacity-0');
-                    } else {
-                        content.classList.add('translate-y-full');
-                    }
+                    if (modal.id === 'receipt-modal') content.classList.add('scale-95', 'opacity-0');
+                    else content.classList.add('translate-y-full');
                 }
-                
                 setTimeout(() => {
-                    if (!keepBackdrop) {
-                        backdrop.classList.add('hidden');
-                    }
+                    if (!keepBackdrop) backdrop.classList.add('hidden');
                     modal.classList.add('hidden');
                 }, 300);
             };
 
             // --- RENDER FUNCTIONS ---
-            const renderMenuItems = (category) => {
-                const section = category === 'drinks' ? drinksSection : foodSection;
-                const items = menu[category];
+            const renderMenuItems = (items, section) => {
                 section.innerHTML = ''; 
+                if (items.length === 0) {
+                    section.innerHTML = `<p class="text-center text-gray-500 col-span-full">No items found.</p>`;
+                    return;
+                }
                 items.forEach(item => {
                     const itemElement = document.createElement('div');
-                    itemElement.className = 'menu-item-card bg-white rounded-xl p-3 flex items-center space-x-4 border border-gray-200 hover:shadow-md transition-shadow';
+                    itemElement.className = 'menu-item-card bg-white rounded-xl p-3 flex items-center space-x-4 border border-gray-200 hover:shadow-md transition-shadow active:scale-95';
                     itemElement.dataset.itemId = item.id;
-                    const placeholderUrl = `https://placehold.co/80x80/e0f2fe/0c4a6e?text=${item.name.split(' ').map(w=>w[0]).join('')}`;
                     
                     itemElement.innerHTML = `
-                        <img src="${item.image}" alt="${item.name}" class="w-20 h-20 rounded-lg object-contain flex-shrink-0 pointer-events-none" onerror="this.onerror=null; this.src='${placeholderUrl}';">
+                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-lg object-contain flex-shrink-0 pointer-events-none" onerror="this.style.display='none'">
                         <div class="flex-grow pointer-events-none">
                             <h3 class="font-semibold text-gray-800">${item.name}</h3>
                             <p class="text-sm text-gray-500">${item.description}</p>
                             <p class="font-bold text-blue-600 mt-2">$${item.price.toFixed(2)}</p>
                         </div>
-                        <div class="bg-blue-600 w-10 h-10 rounded-full flex items-center justify-center text-white text-2xl font-light pointer-events-none">
+                        <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center text-blue-600 text-xl font-bold pointer-events-none">
                             +
                         </div>
                     `;
@@ -260,21 +284,29 @@
                 });
             };
 
+            const renderAllSections = (query = '') => {
+                const lowerQuery = query.toLowerCase();
+                const allItems = [...menu.drinks, ...menu.food];
+                const filteredItems = allItems.filter(item => item.name.toLowerCase().includes(lowerQuery));
+
+                if (query) {
+                    renderMenuItems(filteredItems, searchResultsSection);
+                } else {
+                    renderMenuItems(menu.drinks, drinksSection);
+                    renderMenuItems(menu.food, foodSection);
+                }
+            };
+            
             const renderCart = () => {
                 cartItemsContainer.innerHTML = '';
                 const { totalPrice } = getCartTotals();
-
                 if (cart.length === 0) {
                     cartItemsContainer.innerHTML = `<p class="text-center text-gray-500">Your cart is empty.</p>`;
                 } else {
                     cart.forEach(item => {
                         const cartItemEl = document.createElement('div');
                         cartItemEl.className = 'flex items-center bg-white p-2 rounded-lg';
-                        let detailsHtml = '';
-                        if (item.customizations) {
-                            detailsHtml = `<p class="text-xs text-gray-500">Sugar: ${item.customizations.sugar}, Ice: ${item.customizations.ice}</p>`;
-                        }
-
+                        let detailsHtml = item.customizations ? `<p class="text-xs text-gray-500">Sugar: ${item.customizations.sugar}, Ice: ${item.customizations.ice}</p>` : '';
                         cartItemEl.innerHTML = `
                             <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-md object-contain">
                             <div class="flex-grow mx-3">
@@ -298,15 +330,9 @@
                 cart.forEach(item => {
                     const receiptItemEl = document.createElement('div');
                     receiptItemEl.className = 'flex justify-between items-center text-sm';
-                    let detailsHtml = '';
-                    if (item.customizations) {
-                        detailsHtml = `<span class="text-xs text-gray-400 block">(${item.customizations.sugar} Sugar, ${item.customizations.ice} Ice)</span>`;
-                    }
+                    let detailsHtml = item.customizations ? `<span class="text-xs text-gray-400 block">(${item.customizations.sugar} Sugar, ${item.customizations.ice} Ice)</span>` : '';
                     receiptItemEl.innerHTML = `
-                        <div>
-                            <p class="font-medium">${item.name}</p>
-                            ${detailsHtml}
-                        </div>
+                        <div><p class="font-medium">${item.name}</p>${detailsHtml}</div>
                         <p class="font-medium">$${item.price.toFixed(2)}</p>
                     `;
                     receiptItemsContainer.appendChild(receiptItemEl);
@@ -314,35 +340,24 @@
                 receiptTotalPrice.textContent = `$${totalPrice.toFixed(2)}`;
             };
 
-            // --- CART LOGIC ---
-            const getCartTotals = () => {
-                const totalItems = cart.length;
-                const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
-                return { totalItems, totalPrice };
-            };
-
+            // --- LOGIC ---
+            const getCartTotals = () => ({ totalItems: cart.length, totalPrice: cart.reduce((sum, item) => sum + item.price, 0) });
             const updateCartBar = () => {
                 const { totalItems, totalPrice } = getCartTotals();
-                if (totalItems === 0) {
-                    cartBar.style.transform = 'translateY(100%)';
-                } else {
+                if (totalItems === 0) cartBar.style.transform = 'translateY(150%)';
+                else {
                     cartSummary.textContent = `${totalItems} item${totalItems > 1 ? 's' : ''} in cart`;
                     cartTotal.textContent = `Total: $${totalPrice.toFixed(2)}`;
                     cartBar.style.transform = 'translateY(0)';
                 }
             };
 
-            const addToCart = (item, customizations = null) => {
-                const cartItem = {
-                    ...item,
-                    cartItemId: `cart-${Date.now()}-${Math.random()}`,
-                    customizations
-                };
-                cart.push(cartItem);
-                updateCartBar();
-                if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            const addToCart = (item, customizations = null, quantity = 1) => {
+                for (let i = 0; i < quantity; i++) {
+                    cart.push({ ...item, cartItemId: `cart-${Date.now()}-${Math.random()}`, customizations });
                 }
+                updateCartBar();
+                if (window.Telegram && window.Telegram.WebApp) Telegram.WebApp.HapticFeedback.impactOccurred('light');
             };
 
             const removeFromCart = (cartItemId) => {
@@ -351,44 +366,82 @@
                 renderCart();
             };
 
-            // --- CUSTOMIZATION MODAL ---
+            const flyToCart = (startElement) => {
+                const endElement = viewCartBtn;
+                const clone = startElement.cloneNode(true);
+                const startRect = startElement.getBoundingClientRect();
+                const endRect = endElement.getBoundingClientRect();
+                clone.style.position = 'fixed';
+                clone.style.left = `${startRect.left}px`;
+                clone.style.top = `${startRect.top}px`;
+                clone.style.width = `${startRect.width}px`;
+                clone.style.height = `${startRect.height}px`;
+                clone.classList.add('fly-to-cart');
+                document.body.appendChild(clone);
+                setTimeout(() => {
+                    clone.style.left = `${endRect.left + endRect.width / 2}px`;
+                    clone.style.top = `${endRect.top + endRect.height / 2}px`;
+                    clone.style.width = '0px';
+                    clone.style.height = '0px';
+                    clone.style.opacity = '0';
+                }, 10);
+                setTimeout(() => clone.remove(), 500);
+            };
+
             const openCustomizationModal = (item) => {
                 const customizationModalContent = document.getElementById('customization-modal-content');
+                let quantity = 1;
                 let selectedSugar = '100%';
                 let selectedIce = '100%';
+
+                const updateButtonText = () => {
+                    const btn = customizationModalContent.querySelector('#confirm-add-item-btn');
+                    btn.textContent = `Add ${quantity} to Cart - $${(item.price * quantity).toFixed(2)}`;
+                };
 
                 customizationModalContent.innerHTML = `
                     <div class="flex justify-between items-center pb-3 border-b border-gray-200">
                         <h2 class="text-xl font-bold">${item.name}</h2>
-                        <button class="close-modal-btn text-gray-500 hover:text-gray-800">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
+                        <button class="close-modal-btn text-gray-500 hover:text-gray-800"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                     </div>
                     <div class="my-4 space-y-4">
                         <div>
-                            <h3 class="font-semibold mb-2">Sugar Level</h3>
-                            <div id="sugar-options" class="flex flex-wrap gap-2">
-                                ${customizationOptions.sugar.map(opt => `<button data-value="${opt}" class="option-btn sugar-option border border-gray-300 rounded-full px-4 py-1 text-sm">${opt}</button>`).join('')}
+                            <h3 class="font-semibold mb-2">Quantity</h3>
+                            <div class="flex items-center gap-4">
+                                <button id="decrease-qty" class="bg-gray-200 w-8 h-8 rounded-full font-bold text-lg">-</button>
+                                <span id="quantity-display" class="font-semibold text-lg">${quantity}</span>
+                                <button id="increase-qty" class="bg-gray-200 w-8 h-8 rounded-full font-bold text-lg">+</button>
                             </div>
                         </div>
                         <div>
+                            <h3 class="font-semibold mb-2">Sugar Level</h3>
+                            <div id="sugar-options" class="flex flex-wrap gap-2">${customizationOptions.sugar.map(opt => `<button data-value="${opt}" class="option-btn sugar-option border border-gray-300 rounded-full px-4 py-1 text-sm">${opt}</button>`).join('')}</div>
+                        </div>
+                        <div>
                             <h3 class="font-semibold mb-2">Ice Level</h3>
-                            <div id="ice-options" class="flex flex-wrap gap-2">
-                                ${customizationOptions.ice.map(opt => `<button data-value="${opt}" class="option-btn ice-option border border-gray-300 rounded-full px-4 py-1 text-sm">${opt}</button>`).join('')}
-                            </div>
+                            <div id="ice-options" class="flex flex-wrap gap-2">${customizationOptions.ice.map(opt => `<button data-value="${opt}" class="option-btn ice-option border border-gray-300 rounded-full px-4 py-1 text-sm">${opt}</button>`).join('')}</div>
                         </div>
                     </div>
-                    <button id="confirm-add-item-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
-                        Add to Cart - $${item.price.toFixed(2)}
-                    </button>
+                    <button id="confirm-add-item-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Add to Cart</button>
                 `;
+                updateButtonText();
+
+                const qtyDisplay = customizationModalContent.querySelector('#quantity-display');
+                customizationModalContent.querySelector('#decrease-qty').onclick = () => {
+                    if (quantity > 1) {
+                        quantity--;
+                        qtyDisplay.textContent = quantity;
+                        updateButtonText();
+                    }
+                };
+                customizationModalContent.querySelector('#increase-qty').onclick = () => {
+                    quantity++;
+                    qtyDisplay.textContent = quantity;
+                    updateButtonText();
+                };
 
                 const sugarOptions = customizationModalContent.querySelector('#sugar-options');
-                const iceOptions = customizationModalContent.querySelector('#ice-options');
-
                 sugarOptions.querySelector(`[data-value="${selectedSugar}"]`).classList.add('active');
-                iceOptions.querySelector(`[data-value="${selectedIce}"]`).classList.add('active');
-
                 sugarOptions.addEventListener('click', e => {
                     if (e.target.classList.contains('sugar-option')) {
                         sugarOptions.querySelector('.active').classList.remove('active');
@@ -396,6 +449,9 @@
                         selectedSugar = e.target.dataset.value;
                     }
                 });
+
+                const iceOptions = customizationModalContent.querySelector('#ice-options');
+                iceOptions.querySelector(`[data-value="${selectedIce}"]`).classList.add('active');
                 iceOptions.addEventListener('click', e => {
                     if (e.target.classList.contains('ice-option')) {
                         iceOptions.querySelector('.active').classList.remove('active');
@@ -405,7 +461,7 @@
                 });
                 
                 customizationModalContent.querySelector('#confirm-add-item-btn').addEventListener('click', () => {
-                    addToCart(item, { sugar: selectedSugar, ice: selectedIce });
+                    addToCart(item, { sugar: selectedSugar, ice: selectedIce }, quantity);
                     closeModal(customizationModal);
                 });
 
@@ -415,42 +471,46 @@
             // --- EVENT LISTENERS ---
             const switchTab = (newTab) => {
                 currentTab = newTab;
-                if (newTab === 'drinks') {
-                    drinksTab.classList.add('bg-blue-600', 'text-white');
-                    drinksTab.classList.remove('text-gray-500');
-                    foodTab.classList.add('text-gray-500');
-                    foodTab.classList.remove('bg-blue-600', 'text-white');
-                    drinksSection.classList.remove('hidden');
-                    foodSection.classList.add('hidden');
-                } else {
-                    foodTab.classList.add('bg-blue-600', 'text-white');
-                    foodTab.classList.remove('text-gray-500');
-                    drinksTab.classList.add('text-gray-500');
-                    drinksTab.classList.remove('bg-blue-600', 'text-white');
-                    foodSection.classList.remove('hidden');
-                    drinksSection.classList.add('hidden');
-                }
+                const tabs = { drinks: drinksTab, food: foodTab };
+                const sections = { drinks: drinksSection, food: foodSection };
+                Object.keys(tabs).forEach(key => {
+                    tabs[key].classList.remove('bg-blue-600', 'text-white');
+                    tabs[key].classList.add('text-gray-500');
+                    sections[key].classList.add('hidden');
+                });
+                tabs[newTab].classList.add('bg-blue-600', 'text-white');
+                tabs[newTab].classList.remove('text-gray-500');
+                sections[newTab].classList.remove('hidden');
             };
             
             drinksTab.addEventListener('click', () => switchTab('drinks'));
             foodTab.addEventListener('click', () => switchTab('food'));
-            viewCartBtn.addEventListener('click', () => {
-                renderCart();
-                openModal(cartModal);
-            });
-            
-            checkoutBtn.addEventListener('click', () => {
-                 if (cart.length > 0) {
-                    closeModal(cartModal, true); // Keep backdrop for chained modal
-                    renderReceipt();
-                    openModal(receiptModal);
-                 }
+
+            viewCartBtn.addEventListener('click', () => { renderCart(); openModal(cartModal); });
+            checkoutBtn.addEventListener('click', () => { if (cart.length > 0) { closeModal(cartModal, true); renderReceipt(); openModal(receiptModal); } });
+            newOrderBtn.addEventListener('click', () => { closeModal(receiptModal); cart = []; updateCartBar(); });
+            emptyCartBtn.addEventListener('click', () => { cart = []; renderCart(); updateCartBar(); });
+
+            searchIconBtn.addEventListener('click', () => {
+                navBox.classList.add('is-searching');
+                searchBar.focus();
+                drinksSection.classList.add('hidden');
+                foodSection.classList.add('hidden');
+                searchResultsSection.classList.remove('hidden');
             });
 
-            newOrderBtn.addEventListener('click', () => {
-                closeModal(receiptModal);
-                cart = [];
-                updateCartBar();
+            closeSearchBtn.addEventListener('click', () => {
+                searchBar.value = '';
+                navBox.classList.remove('is-searching');
+                searchResultsSection.classList.add('hidden');
+                switchTab(currentTab);
+            });
+
+            searchBar.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                const allItems = [...menu.drinks, ...menu.food];
+                const filteredItems = allItems.filter(item => item.name.toLowerCase().includes(query));
+                renderMenuItems(filteredItems, searchResultsSection);
             });
 
             document.body.addEventListener('click', (e) => {
@@ -458,28 +518,17 @@
                     const itemId = e.target.closest('.menu-item-card').dataset.itemId;
                     const allItems = [...menu.drinks, ...menu.food];
                     const item = allItems.find(i => i.id === itemId);
-                    if (item.type === 'drink') {
-                        openCustomizationModal(item);
-                    } else {
+                    if (item.type === 'drink') openCustomizationModal(item);
+                    else {
                         addToCart(item);
+                        flyToCart(e.target.closest('.menu-item-card').querySelector('img'));
                     }
                 }
-                if (e.target.closest('.remove-from-cart-btn')) {
-                    const cartItemId = e.target.closest('.remove-from-cart-btn').dataset.cartItemId;
-                    removeFromCart(cartItemId);
-                }
-                if (e.target.closest('.close-modal-btn')) {
-                    closeModal(e.target.closest('.modal'));
-                }
+                if (e.target.closest('.remove-from-cart-btn')) removeFromCart(e.target.closest('.remove-from-cart-btn').dataset.cartItemId);
+                if (e.target.closest('.close-modal-btn')) closeModal(e.target.closest('.modal'));
             });
 
-            backdrop.addEventListener('click', () => {
-                allModals.forEach(modal => {
-                    if (!modal.classList.contains('hidden')) {
-                        closeModal(modal);
-                    }
-                });
-            });
+            backdrop.addEventListener('click', () => allModals.forEach(modal => { if (!modal.classList.contains('hidden')) closeModal(modal); }));
 
             // --- INITIALIZATION ---
             if (window.Telegram && window.Telegram.WebApp) {
@@ -487,9 +536,8 @@
                 Telegram.WebApp.setHeaderColor('#F3F4F6');
                 Telegram.WebApp.setBackgroundColor('#F3F4F6');
             }
-
-            renderMenuItems('drinks');
-            renderMenuItems('food');
+            renderMenuItems(menu.drinks, drinksSection);
+            renderMenuItems(menu.food, foodSection);
             switchTab('drinks');
         });
     </script>
