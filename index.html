@@ -118,9 +118,9 @@
     <!-- Base Modal Structure (for all popups) -->
     <div id="modal-backdrop" class="modal fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40 hidden opacity-0"></div>
 
-    <!-- Customization Modal -->
-    <div id="customization-modal" class="modal fixed inset-0 z-50 hidden flex items-end">
-        <div id="customization-modal-content" class="modal-content w-full bg-gray-100 rounded-t-2xl p-4 flex flex-col transform translate-y-full max-w-lg mx-auto">
+    <!-- Item Detail / Customization Modal -->
+    <div id="item-detail-modal" class="modal fixed inset-0 z-50 hidden flex items-end">
+        <div id="item-detail-modal-content" class="modal-content w-full bg-gray-100 rounded-t-2xl flex flex-col transform translate-y-full max-w-lg mx-auto max-h-[90vh]">
             <!-- Modal content will be injected by JS -->
         </div>
     </div>
@@ -177,10 +177,10 @@
             const defaultFoodIcon = 'https://img.icons8.com/3d-fluency/94/croissant.png';
             const menu = {
                 drinks: [
-                    { id: 'd1', name: 'Iced Americano', description: 'Rich espresso shots over ice.', price: 3.50, image: defaultDrinkIcon, type: 'drink' },
-                    { id: 'd2', name: 'Caramel Macchiato', description: 'Creamy milk, vanilla, and espresso.', price: 4.75, image: defaultDrinkIcon, type: 'drink' },
-                    { id: 'd3', name: 'Matcha Latte', description: 'Earthy green tea with steamed milk.', price: 5.00, image: defaultDrinkIcon, type: 'drink' },
-                    { id: 'd4', name: 'Passionfruit Cooler', description: 'A refreshing tropical blend.', price: 4.25, image: defaultDrinkIcon, type: 'drink' },
+                    { id: 'd1', name: 'Iced Americano', description: 'Rich espresso shots over ice.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 3.50, 'M': 4.00, 'L': 4.50} },
+                    { id: 'd2', name: 'Caramel Macchiato', description: 'Creamy milk, vanilla, and espresso.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 4.75, 'M': 5.25, 'L': 5.75} },
+                    { id: 'd3', name: 'Matcha Latte', description: 'Earthy green tea with steamed milk.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 5.00, 'M': 5.50, 'L': 6.00} },
+                    { id: 'd4', name: 'Passionfruit Cooler', description: 'A refreshing tropical blend.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 4.25, 'M': 4.75, 'L': 5.25} },
                 ],
                 food: [
                     { id: 'f1', name: 'Almond Croissant', description: 'Flaky pastry with almond filling.', price: 3.75, image: defaultFoodIcon, type: 'food' },
@@ -200,7 +200,6 @@
 
             // --- DOM ELEMENTS ---
             const backdrop = document.getElementById('modal-backdrop');
-            const allModals = document.querySelectorAll('.modal');
             const drinksTab = document.getElementById('drinks-tab');
             const foodTab = document.getElementById('food-tab');
             const drinksSection = document.getElementById('drinks-section');
@@ -213,12 +212,14 @@
             
             // Search & Nav elements
             const navBox = document.getElementById('nav-box');
+            const tabsContainer = document.getElementById('tabs-container');
             const searchIconBtn = document.getElementById('search-icon-btn');
+            const searchBarContainer = document.getElementById('search-bar-container');
             const searchBar = document.getElementById('search-bar');
             const closeSearchBtn = document.getElementById('close-search-btn');
 
             // Modals
-            const customizationModal = document.getElementById('customization-modal');
+            const itemDetailModal = document.getElementById('item-detail-modal');
             const cartModal = document.getElementById('cart-modal');
             const receiptModal = document.getElementById('receipt-modal');
 
@@ -274,7 +275,7 @@
                         <div class="flex-grow pointer-events-none">
                             <h3 class="font-semibold text-gray-800">${item.name}</h3>
                             <p class="text-sm text-gray-500">${item.description}</p>
-                            <p class="font-bold text-blue-600 mt-2">$${item.price.toFixed(2)}</p>
+                            <p class="font-bold text-blue-600 mt-2">$${(item.price || Object.values(item.sizes)[0]).toFixed(2)}</p>
                         </div>
                         <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center text-blue-600 text-xl font-bold pointer-events-none">
                             +
@@ -306,7 +307,16 @@
                     cart.forEach(item => {
                         const cartItemEl = document.createElement('div');
                         cartItemEl.className = 'flex items-center bg-white p-2 rounded-lg';
-                        let detailsHtml = item.customizations ? `<p class="text-xs text-gray-500">Sugar: ${item.customizations.sugar}, Ice: ${item.customizations.ice}</p>` : '';
+                        let detailsHtml = '';
+                        if (item.customizations) {
+                            detailsHtml += `<p class="text-xs text-gray-500">Size: ${item.customizations.size}`;
+                            if(item.customizations.sugar) detailsHtml += `, Sugar: ${item.customizations.sugar}, Ice: ${item.customizations.ice}`;
+                            detailsHtml += `</p>`;
+                        }
+                        if(item.instructions) {
+                            detailsHtml += `<p class="text-xs text-gray-400 italic">"${item.instructions}"</p>`;
+                        }
+
                         cartItemEl.innerHTML = `
                             <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-md object-contain">
                             <div class="flex-grow mx-3">
@@ -329,8 +339,17 @@
                 const { totalPrice } = getCartTotals();
                 cart.forEach(item => {
                     const receiptItemEl = document.createElement('div');
-                    receiptItemEl.className = 'flex justify-between items-center text-sm';
-                    let detailsHtml = item.customizations ? `<span class="text-xs text-gray-400 block">(${item.customizations.sugar} Sugar, ${item.customizations.ice} Ice)</span>` : '';
+                    receiptItemEl.className = 'flex justify-between items-start text-sm';
+                    let detailsHtml = '';
+                    if (item.customizations) {
+                        detailsHtml += `<span class="text-xs text-gray-400 block">(Size: ${item.customizations.size}`;
+                        if(item.customizations.sugar) detailsHtml += `, ${item.customizations.sugar} Sugar, ${item.customizations.ice} Ice`;
+                        detailsHtml += `)</span>`;
+                    }
+                    if(item.instructions) {
+                        detailsHtml += `<span class="text-xs text-gray-400 italic block">Note: "${item.instructions}"</span>`;
+                    }
+
                     receiptItemEl.innerHTML = `
                         <div><p class="font-medium">${item.name}</p>${detailsHtml}</div>
                         <p class="font-medium">$${item.price.toFixed(2)}</p>
@@ -352,9 +371,10 @@
                 }
             };
 
-            const addToCart = (item, customizations = null, quantity = 1) => {
+            const addToCart = (item, customizations, quantity = 1, instructions = '') => {
+                const price = customizations && customizations.size ? item.sizes[customizations.size] : item.price;
                 for (let i = 0; i < quantity; i++) {
-                    cart.push({ ...item, cartItemId: `cart-${Date.now()}-${Math.random()}`, customizations });
+                    cart.push({ ...item, cartItemId: `cart-${Date.now()}-${Math.random()}`, customizations, price, instructions });
                 }
                 updateCartBar();
                 if (window.Telegram && window.Telegram.WebApp) Telegram.WebApp.HapticFeedback.impactOccurred('light');
@@ -388,31 +408,35 @@
                 setTimeout(() => clone.remove(), 500);
             };
 
-            const openCustomizationModal = (item) => {
-                const customizationModalContent = document.getElementById('customization-modal-content');
-                let quantity = 1;
+            const openItemDetailModal = (item) => {
+                const itemDetailModalContent = document.getElementById('item-detail-modal-content');
+                
+                let selectedSize = item.type === 'drink' ? Object.keys(item.sizes)[0] : null;
+                let currentPrice = item.type === 'drink' ? item.sizes[selectedSize] : item.price;
                 let selectedSugar = '100%';
                 let selectedIce = '100%';
 
-                const updateButtonText = () => {
-                    const btn = customizationModalContent.querySelector('#confirm-add-item-btn');
-                    btn.textContent = `Add ${quantity} to Cart - $${(item.price * quantity).toFixed(2)}`;
+                const updatePrice = () => {
+                    const priceDisplay = itemDetailModalContent.querySelector('#item-price');
+                    const addButton = itemDetailModalContent.querySelector('#confirm-add-item-btn');
+                    currentPrice = item.type === 'drink' ? item.sizes[selectedSize] : item.price;
+                    priceDisplay.textContent = `$${currentPrice.toFixed(2)}`;
+                    addButton.textContent = `Add to Cart - $${currentPrice.toFixed(2)}`;
                 };
 
-                customizationModalContent.innerHTML = `
-                    <div class="flex justify-between items-center pb-3 border-b border-gray-200">
-                        <h2 class="text-xl font-bold">${item.name}</h2>
-                        <button class="close-modal-btn text-gray-500 hover:text-gray-800"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                    </div>
-                    <div class="my-4 space-y-4">
+                let sizeOptionsHTML = '';
+                if(item.type === 'drink') {
+                    sizeOptionsHTML = `
                         <div>
-                            <h3 class="font-semibold mb-2">Quantity</h3>
-                            <div class="flex items-center gap-4">
-                                <button id="decrease-qty" class="bg-gray-200 w-8 h-8 rounded-full font-bold text-lg">-</button>
-                                <span id="quantity-display" class="font-semibold text-lg">${quantity}</span>
-                                <button id="increase-qty" class="bg-gray-200 w-8 h-8 rounded-full font-bold text-lg">+</button>
-                            </div>
+                            <h3 class="font-semibold mb-2">Size</h3>
+                            <div id="size-options" class="flex flex-wrap gap-2">${Object.keys(item.sizes).map(size => `<button data-value="${size}" class="option-btn size-option border border-gray-300 rounded-full px-5 py-1.5 text-sm">${size}</button>`).join('')}</div>
                         </div>
+                    `;
+                }
+
+                let drinkOptionsHTML = '';
+                if(item.type === 'drink') {
+                    drinkOptionsHTML = `
                         <div>
                             <h3 class="font-semibold mb-2">Sugar Level</h3>
                             <div id="sugar-options" class="flex flex-wrap gap-2">${customizationOptions.sugar.map(opt => `<button data-value="${opt}" class="option-btn sugar-option border border-gray-300 rounded-full px-4 py-1 text-sm">${opt}</button>`).join('')}</div>
@@ -421,51 +445,81 @@
                             <h3 class="font-semibold mb-2">Ice Level</h3>
                             <div id="ice-options" class="flex flex-wrap gap-2">${customizationOptions.ice.map(opt => `<button data-value="${opt}" class="option-btn ice-option border border-gray-300 rounded-full px-4 py-1 text-sm">${opt}</button>`).join('')}</div>
                         </div>
+                    `;
+                }
+
+                itemDetailModalContent.innerHTML = `
+                    <div class="w-full h-48 bg-gray-200 rounded-t-2xl flex items-center justify-center">
+                        <img src="${item.image}" class="w-32 h-32 object-contain">
                     </div>
-                    <button id="confirm-add-item-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Add to Cart</button>
+                    <div class="p-4 flex-grow overflow-y-auto">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h2 class="text-2xl font-bold">${item.name}</h2>
+                                <p class="text-sm text-gray-500 mt-1">${item.description}</p>
+                            </div>
+                            <span id="item-price" class="text-2xl font-bold text-blue-600">$${currentPrice.toFixed(2)}</span>
+                        </div>
+                        <div class="space-y-4 mt-4">
+                            ${sizeOptionsHTML}
+                            ${drinkOptionsHTML}
+                            <div>
+                                <h3 class="font-semibold mb-2">Special Instructions</h3>
+                                <textarea id="special-instructions" class="w-full p-2 border border-gray-300 rounded-lg text-sm" rows="2" placeholder="e.g. extra caramel, no whipped cream..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 border-t border-gray-200">
+                         <button id="confirm-add-item-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Add to Cart</button>
+                    </div>
                 `;
-                updateButtonText();
+                updatePrice();
 
-                const qtyDisplay = customizationModalContent.querySelector('#quantity-display');
-                customizationModalContent.querySelector('#decrease-qty').onclick = () => {
-                    if (quantity > 1) {
-                        quantity--;
-                        qtyDisplay.textContent = quantity;
-                        updateButtonText();
-                    }
-                };
-                customizationModalContent.querySelector('#increase-qty').onclick = () => {
-                    quantity++;
-                    qtyDisplay.textContent = quantity;
-                    updateButtonText();
-                };
+                if (item.type === 'drink') {
+                    const sizeOptions = itemDetailModalContent.querySelector('#size-options');
+                    sizeOptions.querySelector(`[data-value="${selectedSize}"]`).classList.add('active');
+                    sizeOptions.addEventListener('click', e => {
+                        if (e.target.classList.contains('size-option')) {
+                            sizeOptions.querySelector('.active').classList.remove('active');
+                            e.target.classList.add('active');
+                            selectedSize = e.target.dataset.value;
+                            updatePrice();
+                        }
+                    });
 
-                const sugarOptions = customizationModalContent.querySelector('#sugar-options');
-                sugarOptions.querySelector(`[data-value="${selectedSugar}"]`).classList.add('active');
-                sugarOptions.addEventListener('click', e => {
-                    if (e.target.classList.contains('sugar-option')) {
-                        sugarOptions.querySelector('.active').classList.remove('active');
-                        e.target.classList.add('active');
-                        selectedSugar = e.target.dataset.value;
-                    }
-                });
+                    const sugarOptions = itemDetailModalContent.querySelector('#sugar-options');
+                    sugarOptions.querySelector(`[data-value="${selectedSugar}"]`).classList.add('active');
+                    sugarOptions.addEventListener('click', e => {
+                        if (e.target.classList.contains('sugar-option')) {
+                            sugarOptions.querySelector('.active').classList.remove('active');
+                            e.target.classList.add('active');
+                            selectedSugar = e.target.dataset.value;
+                        }
+                    });
 
-                const iceOptions = customizationModalContent.querySelector('#ice-options');
-                iceOptions.querySelector(`[data-value="${selectedIce}"]`).classList.add('active');
-                iceOptions.addEventListener('click', e => {
-                    if (e.target.classList.contains('ice-option')) {
-                        iceOptions.querySelector('.active').classList.remove('active');
-                        e.target.classList.add('active');
-                        selectedIce = e.target.dataset.value;
-                    }
-                });
+                    const iceOptions = itemDetailModalContent.querySelector('#ice-options');
+                    iceOptions.querySelector(`[data-value="${selectedIce}"]`).classList.add('active');
+                    iceOptions.addEventListener('click', e => {
+                        if (e.target.classList.contains('ice-option')) {
+                            iceOptions.querySelector('.active').classList.remove('active');
+                            e.target.classList.add('active');
+                            selectedIce = e.target.dataset.value;
+                        }
+                    });
+                }
                 
-                customizationModalContent.querySelector('#confirm-add-item-btn').addEventListener('click', () => {
-                    addToCart(item, { sugar: selectedSugar, ice: selectedIce }, quantity);
-                    closeModal(customizationModal);
+                itemDetailModalContent.querySelector('#confirm-add-item-btn').addEventListener('click', () => {
+                    const instructions = itemDetailModalContent.querySelector('#special-instructions').value;
+                    const customizations = {
+                        size: selectedSize,
+                        sugar: item.type === 'drink' ? selectedSugar : null,
+                        ice: item.type === 'drink' ? selectedIce : null,
+                    };
+                    addToCart(item, customizations, 1, instructions);
+                    closeModal(itemDetailModal);
                 });
 
-                openModal(customizationModal);
+                openModal(itemDetailModal);
             };
 
             // --- EVENT LISTENERS ---
@@ -518,17 +572,19 @@
                     const itemId = e.target.closest('.menu-item-card').dataset.itemId;
                     const allItems = [...menu.drinks, ...menu.food];
                     const item = allItems.find(i => i.id === itemId);
-                    if (item.type === 'drink') openCustomizationModal(item);
-                    else {
-                        addToCart(item);
-                        flyToCart(e.target.closest('.menu-item-card').querySelector('img'));
-                    }
+                    openItemDetailModal(item);
                 }
                 if (e.target.closest('.remove-from-cart-btn')) removeFromCart(e.target.closest('.remove-from-cart-btn').dataset.cartItemId);
                 if (e.target.closest('.close-modal-btn')) closeModal(e.target.closest('.modal'));
             });
 
-            backdrop.addEventListener('click', () => allModals.forEach(modal => { if (!modal.classList.contains('hidden')) closeModal(modal); }));
+            backdrop.addEventListener('click', () => {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    if (!modal.classList.contains('hidden')) {
+                        closeModal(modal);
+                    }
+                });
+            });
 
             // --- INITIALIZATION ---
             if (window.Telegram && window.Telegram.WebApp) {
