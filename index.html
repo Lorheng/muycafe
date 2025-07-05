@@ -63,20 +63,6 @@
         }
         .menu-item-card {
             cursor: pointer;
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        .menu-item-card.is-visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        /* Fly-to-cart animation */
-        .fly-to-cart {
-            position: fixed;
-            z-index: 100;
-            transition: all 0.5s ease-in-out;
-            border-radius: 50%;
         }
         /* Search/Nav transition styles */
         #nav-box.is-searching #tabs-container {
@@ -116,26 +102,6 @@
         .pop-animation {
             animation: pop-animation 0.2s ease-out;
         }
-        /* Skeleton loading styles */
-        .skeleton-card {
-            background-color: #e5e7eb; /* bg-gray-200 */
-            border-radius: 0.75rem; /* rounded-xl */
-            padding: 0.75rem; /* p-3 */
-            display: flex;
-            align-items: center;
-            gap: 1rem; /* space-x-4 */
-        }
-        .skeleton-img {
-            width: 5rem; /* w-20 */
-            height: 5rem; /* h-20 */
-            background-color: #d1d5db; /* bg-gray-300 */
-            border-radius: 0.5rem; /* rounded-lg */
-        }
-        .skeleton-text {
-            height: 0.75rem; /* h-3 */
-            background-color: #d1d5db; /* bg-gray-300 */
-            border-radius: 0.25rem; /* rounded-md */
-        }
         /* Toast notification */
         #toast {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -144,12 +110,12 @@
 </head>
 <body class="bg-gray-100 text-gray-800 overflow-x-hidden">
 
-    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-64">
+    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-48">
         
         <!-- Header -->
         <header class="text-center p-6">
             <h1 class="text-3xl font-bold tracking-tight text-blue-600">MUY Café</h1>
-            <p id="welcome-header" class="text-gray-500 mt-1">Freshly brewed, just for you.</p>
+            <p class="text-gray-500 mt-1">Freshly brewed, just for you.</p>
         </header>
 
         <!-- Featured Items Carousel -->
@@ -179,36 +145,11 @@
         </nav>
 
         <!-- Menu Items Container -->
-        <main id="main-content" class="px-4 mt-6 opacity-0 transition-opacity duration-500">
+        <main class="px-4 mt-6">
             <div id="drinks-section" class="space-y-4"></div>
             <div id="food-section" class="space-y-4 hidden"></div>
             <div id="search-results-section" class="space-y-4 hidden"></div>
         </main>
-        
-        <!-- Skeleton Loader -->
-        <div id="skeleton-loader" class="px-4 mt-6 space-y-4">
-            <div class="skeleton-card animate-pulse">
-                <div class="skeleton-img"></div>
-                <div class="flex-grow space-y-2">
-                    <div class="skeleton-text w-3/4"></div>
-                    <div class="skeleton-text w-1/2"></div>
-                </div>
-            </div>
-             <div class="skeleton-card animate-pulse">
-                <div class="skeleton-img"></div>
-                <div class="flex-grow space-y-2">
-                    <div class="skeleton-text w-3/4"></div>
-                    <div class="skeleton-text w-1/2"></div>
-                </div>
-            </div>
-             <div class="skeleton-card animate-pulse">
-                <div class="skeleton-img"></div>
-                <div class="flex-grow space-y-2">
-                    <div class="skeleton-text w-3/4"></div>
-                    <div class="skeleton-text w-1/2"></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Floating Cart Bar -->
@@ -340,7 +281,6 @@
             // --- DOM ELEMENTS ---
             const welcomeHeader = document.getElementById('welcome-header');
             const featuredCarousel = document.getElementById('featured-carousel');
-            const skeletonLoader = document.getElementById('skeleton-loader');
             const mainContent = document.getElementById('main-content');
             const backdrop = document.getElementById('modal-backdrop');
             const drinksTab = document.getElementById('drinks-tab');
@@ -986,25 +926,9 @@
             
             // --- INITIALIZATION ---
             const initApp = () => {
-                renderFeaturedItems();
                 renderAllSections();
                 switchTab('drinks');
-                
-                skeletonLoader.style.display = 'none';
-                mainContent.style.opacity = '1';
-
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('is-visible');
-                            observer.unobserve(entry.target);
-                        }
-                    });
-                }, { threshold: 0.1 });
-
-                document.querySelectorAll('.menu-item-card').forEach(card => {
-                    observer.observe(card);
-                });
+                updateCartBar();
             };
 
             if (window.Telegram && window.Telegram.WebApp) {
@@ -1012,7 +936,7 @@
                 Telegram.WebApp.setHeaderColor('#F3F4F6');
                 Telegram.WebApp.setBackgroundColor('#F3F4F6');
             }
-            setTimeout(initApp, 500);
+            initApp();
         });
     </script>
 
