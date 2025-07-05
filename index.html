@@ -21,6 +21,10 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        /* Lock body scroll when a modal is open */
+        body.modal-open {
+            overflow: hidden;
+        }
         /* Custom scrollbar for a cleaner look */
         ::-webkit-scrollbar {
             width: 4px;
@@ -64,11 +68,22 @@
             opacity: 1;
             pointer-events: auto;
         }
+        /* Nutrition details transition */
+        #nutrition-details {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        #nutrition-details.expanded {
+            max-height: 200px; /* Adjust as needed */
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 overflow-x-hidden">
 
-    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-48">
+    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-56">
         
         <!-- Header -->
         <header class="text-center p-6">
@@ -103,7 +118,7 @@
     </div>
 
     <!-- Floating Cart Bar -->
-    <div id="cart-bar" class="fixed bottom-4 left-4 right-4 max-w-lg mx-auto bg-white border border-gray-200 p-4 transform translate-y-full shadow-2xl rounded-2xl" style="transition: transform 0.3s ease-in-out;">
+    <div id="cart-bar" class="fixed bottom-6 left-4 right-4 max-w-lg mx-auto bg-white border border-gray-200 p-4 transform translate-y-full shadow-2xl rounded-2xl" style="transition: transform 0.3s ease-in-out;">
         <div class="flex justify-between items-center">
             <div>
                 <p id="cart-summary" class="font-semibold text-gray-800">Your Order</p>
@@ -177,16 +192,16 @@
             const defaultFoodIcon = 'https://img.icons8.com/3d-fluency/94/croissant.png';
             const menu = {
                 drinks: [
-                    { id: 'd1', name: 'Iced Americano', description: 'Rich espresso shots over ice.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 3.50, 'M': 4.00, 'L': 4.50} },
-                    { id: 'd2', name: 'Caramel Macchiato', description: 'Creamy milk, vanilla, and espresso.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 4.75, 'M': 5.25, 'L': 5.75} },
-                    { id: 'd3', name: 'Matcha Latte', description: 'Earthy green tea with steamed milk.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 5.00, 'M': 5.50, 'L': 6.00} },
-                    { id: 'd4', name: 'Passionfruit Cooler', description: 'A refreshing tropical blend.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 4.25, 'M': 4.75, 'L': 5.25} },
+                    { id: 'd1', name: 'Iced Americano', description: 'Rich espresso shots over ice.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 3.50, 'M': 4.00, 'L': 4.50}, isAvailable: true, nutrition: '5 Calories', allergens: 'None' },
+                    { id: 'd2', name: 'Caramel Macchiato', description: 'Creamy milk, vanilla, and espresso.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 4.75, 'M': 5.25, 'L': 5.75}, isAvailable: true, nutrition: '250 Calories', allergens: 'Contains Dairy' },
+                    { id: 'd3', name: 'Matcha Latte', description: 'Earthy green tea with steamed milk.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 5.00, 'M': 5.50, 'L': 6.00}, isAvailable: false, nutrition: '190 Calories', allergens: 'Contains Dairy' },
+                    { id: 'd4', name: 'Passionfruit Cooler', description: 'A refreshing tropical blend.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 4.25, 'M': 4.75, 'L': 5.25}, isAvailable: true, nutrition: '150 Calories', allergens: 'None' },
                 ],
                 food: [
-                    { id: 'f1', name: 'Almond Croissant', description: 'Flaky pastry with almond filling.', price: 3.75, image: defaultFoodIcon, type: 'food' },
-                    { id: 'f2', name: 'Avocado Toast', description: 'Sourdough with fresh avocado.', price: 8.50, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/avocado-sandwich-6624255-5506264.png', type: 'food' },
-                    { id: 'f3', name: 'Chocolate Chip Cookie', description: 'Classic, soft, and chewy.', price: 2.50, image: 'https://img.icons8.com/3d-fluency/94/cookie.png', type: 'food' },
-                    { id: 'f4', name: 'Breakfast Burrito', description: 'Eggs, cheese, and salsa.', price: 7.00, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/burrito-6292520-5145326.png', type: 'food' },
+                    { id: 'f1', name: 'Almond Croissant', description: 'Flaky pastry with almond filling.', price: 3.75, image: defaultFoodIcon, type: 'food', isAvailable: true, nutrition: '400 Calories', allergens: 'Contains Nuts, Dairy, Wheat' },
+                    { id: 'f2', name: 'Avocado Toast', description: 'Sourdough with fresh avocado.', price: 8.50, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/avocado-sandwich-6624255-5506264.png', type: 'food', isAvailable: true, nutrition: '350 Calories', allergens: 'Contains Wheat' },
+                    { id: 'f3', name: 'Chocolate Chip Cookie', description: 'Classic, soft, and chewy.', price: 2.50, image: 'https://img.icons8.com/3d-fluency/94/cookie.png', type: 'food', isAvailable: true, nutrition: '220 Calories', allergens: 'Contains Dairy, Wheat' },
+                    { id: 'f4', name: 'Breakfast Burrito', description: 'Eggs, cheese, and salsa.', price: 7.00, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/burrito-6292520-5145326.png', type: 'food', isAvailable: true, nutrition: '550 Calories', allergens: 'Contains Dairy, Wheat' },
                 ]
             };
             const customizationOptions = {
@@ -212,9 +227,7 @@
             
             // Search & Nav elements
             const navBox = document.getElementById('nav-box');
-            const tabsContainer = document.getElementById('tabs-container');
             const searchIconBtn = document.getElementById('search-icon-btn');
-            const searchBarContainer = document.getElementById('search-bar-container');
             const searchBar = document.getElementById('search-bar');
             const closeSearchBtn = document.getElementById('close-search-btn');
 
@@ -236,6 +249,7 @@
 
             // --- GENERAL MODAL FUNCTIONS ---
             const openModal = (modal) => {
+                document.body.classList.add('modal-open');
                 backdrop.classList.remove('hidden');
                 modal.classList.remove('hidden');
                 setTimeout(() => {
@@ -246,7 +260,10 @@
             };
 
             const closeModal = (modal, keepBackdrop = false) => {
-                if (!keepBackdrop) backdrop.classList.add('opacity-0');
+                if (!keepBackdrop) {
+                    backdrop.classList.add('opacity-0');
+                    document.body.classList.remove('modal-open');
+                }
                 const content = modal.querySelector('.modal-content');
                 if(content) {
                     if (modal.id === 'receipt-modal') content.classList.add('scale-95', 'opacity-0');
@@ -411,17 +428,18 @@
             const openItemDetailModal = (item) => {
                 const itemDetailModalContent = document.getElementById('item-detail-modal-content');
                 
+                let quantity = 1;
                 let selectedSize = item.type === 'drink' ? Object.keys(item.sizes)[0] : null;
                 let currentPrice = item.type === 'drink' ? item.sizes[selectedSize] : item.price;
                 let selectedSugar = '100%';
                 let selectedIce = '100%';
 
-                const updatePrice = () => {
+                const updatePriceAndButton = () => {
                     const priceDisplay = itemDetailModalContent.querySelector('#item-price');
                     const addButton = itemDetailModalContent.querySelector('#confirm-add-item-btn');
                     currentPrice = item.type === 'drink' ? item.sizes[selectedSize] : item.price;
-                    priceDisplay.textContent = `$${currentPrice.toFixed(2)}`;
-                    addButton.textContent = `Add to Cart - $${currentPrice.toFixed(2)}`;
+                    priceDisplay.textContent = `$${(currentPrice * quantity).toFixed(2)}`;
+                    addButton.textContent = `Add ${quantity} to Cart - $${(currentPrice * quantity).toFixed(2)}`;
                 };
 
                 let sizeOptionsHTML = '';
@@ -449,8 +467,11 @@
                 }
 
                 itemDetailModalContent.innerHTML = `
-                    <div class="w-full h-48 bg-gray-200 rounded-t-2xl flex items-center justify-center">
+                    <div class="relative w-full h-48 bg-gray-200 rounded-t-2xl flex items-center justify-center">
                         <img src="${item.image}" class="w-32 h-32 object-contain">
+                        <button class="close-modal-btn absolute top-4 right-4 bg-black/20 p-1 rounded-full text-white hover:bg-black/40 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
                     </div>
                     <div class="p-4 flex-grow overflow-y-auto">
                         <div class="flex justify-between items-start mb-2">
@@ -461,19 +482,48 @@
                             <span id="item-price" class="text-2xl font-bold text-blue-600">$${currentPrice.toFixed(2)}</span>
                         </div>
                         <div class="space-y-4 mt-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-semibold">Quantity</h3>
+                                <div class="flex items-center gap-4">
+                                    <button id="decrease-qty" class="bg-gray-200 w-8 h-8 rounded-full font-bold text-lg">-</button>
+                                    <span id="quantity-display" class="font-semibold text-lg">${quantity}</span>
+                                    <button id="increase-qty" class="bg-gray-200 w-8 h-8 rounded-full font-bold text-lg">+</button>
+                                </div>
+                            </div>
                             ${sizeOptionsHTML}
                             ${drinkOptionsHTML}
                             <div>
                                 <h3 class="font-semibold mb-2">Special Instructions</h3>
                                 <textarea id="special-instructions" class="w-full p-2 border border-gray-300 rounded-lg text-sm" rows="2" placeholder="e.g. extra caramel, no whipped cream..."></textarea>
                             </div>
+                            <div>
+                                <a href="#" id="nutrition-toggle" class="text-sm text-blue-600">Nutrition & Allergens</a>
+                                <div id="nutrition-details" class="mt-2 text-sm text-gray-600 bg-gray-200 p-3 rounded-lg">
+                                    <p><b>Nutrition:</b> ${item.nutrition}</p>
+                                    <p><b>Allergens:</b> ${item.allergens}</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="p-4 border-t border-gray-200">
-                         <button id="confirm-add-item-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">Add to Cart</button>
+                         <button id="confirm-add-item-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors disabled:bg-gray-400">Add to Cart</button>
                     </div>
                 `;
-                updatePrice();
+                updatePriceAndButton();
+
+                const qtyDisplay = itemDetailModalContent.querySelector('#quantity-display');
+                itemDetailModalContent.querySelector('#decrease-qty').onclick = () => {
+                    if (quantity > 1) {
+                        quantity--;
+                        qtyDisplay.textContent = quantity;
+                        updatePriceAndButton();
+                    }
+                };
+                itemDetailModalContent.querySelector('#increase-qty').onclick = () => {
+                    quantity++;
+                    qtyDisplay.textContent = quantity;
+                    updatePriceAndButton();
+                };
 
                 if (item.type === 'drink') {
                     const sizeOptions = itemDetailModalContent.querySelector('#size-options');
@@ -483,7 +533,7 @@
                             sizeOptions.querySelector('.active').classList.remove('active');
                             e.target.classList.add('active');
                             selectedSize = e.target.dataset.value;
-                            updatePrice();
+                            updatePriceAndButton();
                         }
                     });
 
@@ -508,16 +558,28 @@
                     });
                 }
                 
-                itemDetailModalContent.querySelector('#confirm-add-item-btn').addEventListener('click', () => {
-                    const instructions = itemDetailModalContent.querySelector('#special-instructions').value;
-                    const customizations = {
-                        size: selectedSize,
-                        sugar: item.type === 'drink' ? selectedSugar : null,
-                        ice: item.type === 'drink' ? selectedIce : null,
-                    };
-                    addToCart(item, customizations, 1, instructions);
-                    closeModal(itemDetailModal);
+                itemDetailModalContent.querySelector('#nutrition-toggle').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    itemDetailModalContent.querySelector('#nutrition-details').classList.toggle('expanded');
                 });
+
+                const confirmBtn = itemDetailModalContent.querySelector('#confirm-add-item-btn');
+                if (!item.isAvailable) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.textContent = 'Temporarily Unavailable';
+                    itemDetailModalContent.querySelectorAll('.option-btn, #decrease-qty, #increase-qty, #special-instructions').forEach(el => el.disabled = true);
+                } else {
+                    confirmBtn.addEventListener('click', () => {
+                        const instructions = itemDetailModalContent.querySelector('#special-instructions').value;
+                        const customizations = {
+                            size: selectedSize,
+                            sugar: item.type === 'drink' ? selectedSugar : null,
+                            ice: item.type === 'drink' ? selectedIce : null,
+                        };
+                        addToCart(item, customizations, quantity, instructions);
+                        closeModal(itemDetailModal);
+                    });
+                }
 
                 openModal(itemDetailModal);
             };
