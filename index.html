@@ -16,6 +16,9 @@
     <!-- Telegram Web App script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
+    <!-- Confetti library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    
     <style>
         /* Use the Inter font family */
         body {
@@ -28,6 +31,7 @@
         /* Custom scrollbar for a cleaner look */
         ::-webkit-scrollbar {
             width: 4px;
+            height: 4px;
         }
         ::-webkit-scrollbar-track {
             background: #f1f5f9; /* bg-slate-100 */
@@ -35,6 +39,14 @@
         ::-webkit-scrollbar-thumb {
             background: #94a3b8; /* bg-slate-400 */
             border-radius: 2px;
+        }
+        /* Hide scrollbar for the featured carousel */
+        #featured-carousel::-webkit-scrollbar, #suggestions-carousel::-webkit-scrollbar {
+            display: none;
+        }
+        #featured-carousel, #suggestions-carousel {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
         /* Transitions for modals */
         .modal {
@@ -51,6 +63,13 @@
         }
         .menu-item-card {
             cursor: pointer;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .menu-item-card.is-visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         /* Fly-to-cart animation */
         .fly-to-cart {
@@ -79,17 +98,67 @@
             max-height: 200px; /* Adjust as needed */
             opacity: 1;
         }
+        /* Animation for price updates */
+        @keyframes price-flash {
+            0% { color: #2563eb; }
+            50% { color: #1d4ed8; transform: scale(1.1); }
+            100% { color: #2563eb; }
+        }
+        .price-flash-animation {
+            animation: price-flash 0.3s ease-in-out;
+        }
+        /* Animation for option selection */
+        @keyframes pop-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pop-animation {
+            animation: pop-animation 0.2s ease-out;
+        }
+        /* Skeleton loading styles */
+        .skeleton-card {
+            background-color: #e5e7eb; /* bg-gray-200 */
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 0.75rem; /* p-3 */
+            display: flex;
+            align-items: center;
+            gap: 1rem; /* space-x-4 */
+        }
+        .skeleton-img {
+            width: 4rem; /* w-16 */
+            height: 4rem; /* h-16 */
+            background-color: #d1d5db; /* bg-gray-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+        .skeleton-text {
+            height: 0.75rem; /* h-3 */
+            background-color: #d1d5db; /* bg-gray-300 */
+            border-radius: 0.25rem; /* rounded-md */
+        }
+        /* Toast notification */
+        #toast {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 overflow-x-hidden">
 
-    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-56">
+    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-64">
         
         <!-- Header -->
         <header class="text-center p-6">
             <h1 class="text-3xl font-bold tracking-tight text-blue-600">MUY Café</h1>
-            <p class="text-gray-500 mt-1">Freshly brewed, just for you.</p>
+            <p id="welcome-header" class="text-gray-500 mt-1">Freshly brewed, just for you.</p>
         </header>
+
+        <!-- Featured Items Carousel -->
+        <section class="mb-6">
+            <h2 class="font-bold text-lg px-4 mb-2">Popular Items</h2>
+            <div id="featured-carousel" class="flex overflow-x-auto gap-4 px-4 pb-4">
+                <!-- Featured items will be injected here -->
+            </div>
+        </section>
 
         <!-- Category Tabs & Search -->
         <nav class="sticky top-0 bg-gray-100/80 backdrop-blur-sm z-10 px-4 py-3">
@@ -110,15 +179,40 @@
         </nav>
 
         <!-- Menu Items Container -->
-        <main class="px-4 mt-6">
+        <main id="main-content" class="px-4 mt-6 opacity-0 transition-opacity duration-500">
             <div id="drinks-section" class="space-y-4"></div>
             <div id="food-section" class="space-y-4 hidden"></div>
             <div id="search-results-section" class="space-y-4 hidden"></div>
         </main>
+        
+        <!-- Skeleton Loader -->
+        <div id="skeleton-loader" class="px-4 mt-6 space-y-4">
+            <div class="skeleton-card animate-pulse">
+                <div class="skeleton-img"></div>
+                <div class="flex-grow space-y-2">
+                    <div class="skeleton-text w-3/4"></div>
+                    <div class="skeleton-text w-1/2"></div>
+                </div>
+            </div>
+             <div class="skeleton-card animate-pulse">
+                <div class="skeleton-img"></div>
+                <div class="flex-grow space-y-2">
+                    <div class="skeleton-text w-3/4"></div>
+                    <div class="skeleton-text w-1/2"></div>
+                </div>
+            </div>
+             <div class="skeleton-card animate-pulse">
+                <div class="skeleton-img"></div>
+                <div class="flex-grow space-y-2">
+                    <div class="skeleton-text w-3/4"></div>
+                    <div class="skeleton-text w-1/2"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Floating Cart Bar -->
-    <div id="cart-bar" class="fixed bottom-6 left-4 right-4 max-w-lg mx-auto bg-white border border-gray-200 p-4 transform translate-y-full shadow-2xl rounded-2xl" style="transition: transform 0.3s ease-in-out;">
+    <div id="cart-bar" class="fixed bottom-8 left-4 right-4 max-w-lg mx-auto bg-white border border-gray-200 p-4 transform translate-y-full shadow-2xl rounded-2xl" style="transition: transform 0.3s ease-in-out;">
         <div class="flex justify-between items-center">
             <div>
                 <p id="cart-summary" class="font-semibold text-gray-800">Your Order</p>
@@ -130,6 +224,11 @@
         </div>
     </div>
     
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-black/70 text-white text-sm font-semibold px-4 py-2 rounded-full transform -translate-y-20 opacity-0 z-50">
+        <span id="toast-message"></span>
+    </div>
+
     <!-- Base Modal Structure (for all popups) -->
     <div id="modal-backdrop" class="modal fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40 hidden opacity-0"></div>
 
@@ -150,36 +249,63 @@
                 </button>
             </div>
             <div id="cart-items-container" class="flex-grow overflow-y-auto my-4 space-y-3"></div>
-            <div class="flex justify-between items-center mb-4 text-sm">
-                 <button id="empty-cart-btn" class="text-red-500 hover:text-red-700 font-semibold">Empty Cart</button>
-                 <div class="text-right">
-                    <span class="text-lg font-medium">Total:</span>
-                    <span id="modal-total-price" class="text-2xl font-bold text-blue-600">$0.00</span>
+            <div class="border-t border-gray-200 pt-4">
+                <div class="space-y-1 text-sm text-gray-600 mb-4">
+                    <div class="flex justify-between"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
+                    <div class="flex justify-between"><span>Tax (10%)</span><span id="cart-tax">$0.00</span></div>
+                    <div class="flex justify-between font-bold text-lg text-gray-800"><span>Total</span><span id="cart-final-total">$0.00</span></div>
                 </div>
+                <button id="empty-cart-btn" class="text-xs text-red-500 hover:underline mb-4">Empty Cart</button>
+                <button id="checkout-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
+                    Proceed to Checkout
+                </button>
             </div>
-            <button id="checkout-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
-                Proceed to Checkout
-            </button>
         </div>
     </div>
 
     <!-- Receipt Modal -->
     <div id="receipt-modal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div id="receipt-modal-content" class="modal-content w-full bg-white rounded-2xl p-6 flex flex-col transform scale-95 opacity-0 max-w-sm mx-auto shadow-2xl">
-            <div class="text-center mb-4">
-                <svg class="w-16 h-16 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <h2 class="text-2xl font-bold mt-2">Order Successful!</h2>
-                <p class="text-gray-500 text-sm">Here is your receipt.</p>
-            </div>
-            <div id="receipt-items-container" class="flex-grow overflow-y-auto my-4 space-y-2 border-t border-b border-dashed py-4"></div>
-            <div class="flex-shrink-0">
-                <div class="flex justify-between items-center font-bold text-lg mb-4">
-                    <span>Total</span>
-                    <span id="receipt-total-price">$0.00</span>
+        <div class="relative w-full max-w-sm mx-auto">
+            <canvas id="confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+            <div id="receipt-modal-content" class="modal-content w-full bg-white rounded-2xl p-6 flex flex-col transform scale-95 opacity-0 shadow-2xl">
+                <div class="text-center mb-4">
+                    <svg class="w-16 h-16 text-blue-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <h2 class="text-2xl font-bold mt-2">Order Placed!</h2>
                 </div>
-                <button id="new-order-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
-                    Place New Order
-                </button>
+                <div class="text-center text-sm text-gray-500 mb-4">
+                    <p>Order <b id="receipt-order-number">#00000</b></p>
+                    <p id="receipt-timestamp">Date & Time</p>
+                </div>
+                <div id="receipt-items-container" class="flex-grow overflow-y-auto my-4 space-y-2 border-t border-b border-dashed py-4"></div>
+                <div class="flex-shrink-0">
+                    <div class="flex justify-between items-center font-bold text-lg mb-4">
+                        <span>Total to Pay</span>
+                        <span id="receipt-total-price">$0.00</span>
+                    </div>
+                    <div class="text-center bg-blue-50 p-3 rounded-lg text-sm text-blue-800">
+                        <p>Your order will be ready in <b>10-15 minutes.</b></p>
+                        <p>Please show this receipt at the counter to pay.</p>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button id="share-receipt-btn" class="flex-1 bg-gray-200 text-gray-800 font-bold py-2 rounded-lg flex items-center justify-center gap-2">
+                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12s-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.368a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path></svg>
+                            Share
+                        </button>
+                        <button id="new-order-btn" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-lg">New Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div id="confirm-modal-content" class="modal-content w-full bg-white rounded-2xl p-6 flex flex-col transform scale-95 opacity-0 max-w-sm mx-auto shadow-2xl">
+            <h2 id="confirm-title" class="text-lg font-bold text-center">Are you sure?</h2>
+            <p id="confirm-message" class="text-center text-gray-500 text-sm mt-2 mb-6">This action cannot be undone.</p>
+            <div class="flex justify-center gap-4">
+                <button id="confirm-cancel-btn" class="flex-1 bg-gray-200 text-gray-800 font-bold py-2 rounded-lg">Cancel</button>
+                <button id="confirm-action-btn" class="flex-1 bg-red-500 text-white font-bold py-2 rounded-lg">Confirm</button>
             </div>
         </div>
     </div>
@@ -188,32 +314,34 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- DATA ---
-            const defaultDrinkIcon = 'https://img.icons8.com/3d-fluency/94/coffee-to-go.png';
-            const defaultFoodIcon = 'https://img.icons8.com/3d-fluency/94/croissant.png';
             const menu = {
                 drinks: [
-                    { id: 'd1', name: 'Iced Americano', description: 'Rich espresso shots over ice.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 3.50, 'M': 4.00, 'L': 4.50}, isAvailable: true, nutrition: '5 Calories', allergens: 'None' },
-                    { id: 'd2', name: 'Caramel Macchiato', description: 'Creamy milk, vanilla, and espresso.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 4.75, 'M': 5.25, 'L': 5.75}, isAvailable: true, nutrition: '250 Calories', allergens: 'Contains Dairy' },
-                    { id: 'd3', name: 'Matcha Latte', description: 'Earthy green tea with steamed milk.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 5.00, 'M': 5.50, 'L': 6.00}, isAvailable: false, nutrition: '190 Calories', allergens: 'Contains Dairy' },
-                    { id: 'd4', name: 'Passionfruit Cooler', description: 'A refreshing tropical blend.', image: defaultDrinkIcon, type: 'drink', sizes: {'S': 4.25, 'M': 4.75, 'L': 5.25}, isAvailable: true, nutrition: '150 Calories', allergens: 'None' },
+                    { id: 'd1', name: 'Iced Americano', description: 'Rich espresso shots over ice.', image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_q1qt28q1qt28q1qt.png?alt=media&token=bb08ee49-5047-41b8-b259-397916b76e29', type: 'drink', category: 'Coffee', sizes: {'S': 3.50, 'M': 4.00, 'L': 4.50}, isAvailable: true, nutrition: '5 Calories', allergens: 'None', featured: true },
+                    { id: 'd2', name: 'Caramel Macchiato', description: 'Creamy milk, vanilla, and espresso.', image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_kemdcbkemdcbkemd.png?alt=media&token=6aad0440-9355-456c-92c4-e50e06fe5bda', type: 'drink', category: 'Coffee', sizes: {'S': 4.75, 'M': 5.25, 'L': 5.75}, isAvailable: true, nutrition: '250 Calories', allergens: 'Contains Dairy' },
+                    { id: 'd3', name: 'Matcha Latte', description: 'Earthy green tea with steamed milk.', image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_j6oevfj6oevfj6oe.png?alt=media&token=44fbe0c7-e1fb-4399-b75c-a25f1d00bc71', type: 'drink', category: 'Tea', sizes: {'S': 5.00, 'M': 5.50, 'L': 6.00}, isAvailable: true, nutrition: '190 Calories', allergens: 'Contains Dairy' },
+                    { id: 'd4', name: 'Passionfruit Cooler', description: 'A refreshing tropical blend.', image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_nmoow0nmoow0nmoo.png?alt=media&token=3f0d97ff-6577-430c-bc31-d634f2a6a3b8', type: 'drink', category: 'Coolers', sizes: {'S': 4.25, 'M': 4.75, 'L': 5.25}, isAvailable: true, nutrition: '150 Calories', allergens: 'None' },
                 ],
                 food: [
-                    { id: 'f1', name: 'Almond Croissant', description: 'Flaky pastry with almond filling.', price: 3.75, image: defaultFoodIcon, type: 'food', isAvailable: true, nutrition: '400 Calories', allergens: 'Contains Nuts, Dairy, Wheat' },
-                    { id: 'f2', name: 'Avocado Toast', description: 'Sourdough with fresh avocado.', price: 8.50, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/avocado-sandwich-6624255-5506264.png', type: 'food', isAvailable: true, nutrition: '350 Calories', allergens: 'Contains Wheat' },
-                    { id: 'f3', name: 'Chocolate Chip Cookie', description: 'Classic, soft, and chewy.', price: 2.50, image: 'https://img.icons8.com/3d-fluency/94/cookie.png', type: 'food', isAvailable: true, nutrition: '220 Calories', allergens: 'Contains Dairy, Wheat' },
-                    { id: 'f4', name: 'Breakfast Burrito', description: 'Eggs, cheese, and salsa.', price: 7.00, image: 'https://cdn3d.iconscout.com/3d/premium/thumb/burrito-6292520-5145326.png', type: 'food', isAvailable: true, nutrition: '550 Calories', allergens: 'Contains Dairy, Wheat' },
+                    { id: 'f1', name: 'Almond Croissant', description: 'Flaky pastry with almond filling.', price: 3.75, image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_f14m6gf14m6gf14m.png?alt=media&token=c8cec1c9-436a-4e6e-9e9b-ba63e27bad0a', type: 'food', category: 'Pastries', isAvailable: true, nutrition: '400 Calories', allergens: 'Contains Nuts, Dairy, Wheat', featured: true },
+                    { id: 'f2', name: 'Avocado Toast', description: 'Sourdough with fresh avocado.', price: 8.50, image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_cv515ccv515ccv51.png?alt=media&token=f6ec5f57-2e01-4121-af28-afcad8159ed5', type: 'food', category: 'Savory', isAvailable: true, nutrition: '350 Calories', allergens: 'Contains Wheat', featured: true },
+                    { id: 'f3', name: 'Chocolate Chip Cookie', description: 'Classic, soft, and chewy.', price: 2.50, image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_2f6ung2f6ung2f6u.png?alt=media&token=686aa9cd-1124-4220-9648-19f70678223a', type: 'food', category: 'Pastries', isAvailable: true, nutrition: '220 Calories', allergens: 'Contains Dairy, Wheat' },
+                    { id: 'f4', name: 'Breakfast Burrito', description: 'Eggs, cheese, and salsa.', price: 7.00, image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_owfyqnowfyqnowfy.png?alt=media&token=451a7df4-b8d5-448b-9fa6-549524919e7a', type: 'food', category: 'Savory', isAvailable: true, nutrition: '550 Calories', allergens: 'Contains Dairy, Wheat' },
                 ]
             };
             const customizationOptions = {
                 sugar: ['100%', '75%', '50%', '25%', '0%'],
                 ice: ['100%', '50%', '0%', 'No Ice']
             };
-
+            
             // --- STATE ---
-            let cart = []; 
+            let cart = {}; 
             let currentTab = 'drinks';
 
             // --- DOM ELEMENTS ---
+            const welcomeHeader = document.getElementById('welcome-header');
+            const featuredCarousel = document.getElementById('featured-carousel');
+            const skeletonLoader = document.getElementById('skeleton-loader');
+            const mainContent = document.getElementById('main-content');
             const backdrop = document.getElementById('modal-backdrop');
             const drinksTab = document.getElementById('drinks-tab');
             const foodTab = document.getElementById('food-tab');
@@ -224,6 +352,8 @@
             const cartSummary = document.getElementById('cart-summary');
             const cartTotal = document.getElementById('cart-total');
             const viewCartBtn = document.getElementById('view-cart-btn');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
             
             // Search & Nav elements
             const navBox = document.getElementById('nav-box');
@@ -235,17 +365,23 @@
             const itemDetailModal = document.getElementById('item-detail-modal');
             const cartModal = document.getElementById('cart-modal');
             const receiptModal = document.getElementById('receipt-modal');
+            const confirmModal = document.getElementById('confirm-modal');
 
             // Cart Elements
             const cartItemsContainer = document.getElementById('cart-items-container');
-            const modalTotalPrice = document.getElementById('modal-total-price');
+            const cartSubtotalEl = document.getElementById('cart-subtotal');
+            const cartTaxEl = document.getElementById('cart-tax');
+            const cartFinalTotalEl = document.getElementById('cart-final-total');
             const checkoutBtn = document.getElementById('checkout-btn');
             const emptyCartBtn = document.getElementById('empty-cart-btn');
 
             // Receipt Elements
             const receiptItemsContainer = document.getElementById('receipt-items-container');
             const receiptTotalPrice = document.getElementById('receipt-total-price');
+            const receiptOrderNumber = document.getElementById('receipt-order-number');
+            const receiptTimestamp = document.getElementById('receipt-timestamp');
             const newOrderBtn = document.getElementById('new-order-btn');
+            const shareReceiptBtn = document.getElementById('share-receipt-btn');
 
             // --- GENERAL MODAL FUNCTIONS ---
             const openModal = (modal) => {
@@ -266,7 +402,7 @@
                 }
                 const content = modal.querySelector('.modal-content');
                 if(content) {
-                    if (modal.id === 'receipt-modal') content.classList.add('scale-95', 'opacity-0');
+                    if (modal.id === 'receipt-modal' || modal.id === 'confirm-modal') content.classList.add('scale-95', 'opacity-0');
                     else content.classList.add('translate-y-full');
                 }
                 setTimeout(() => {
@@ -275,30 +411,100 @@
                 }, 300);
             };
 
+            const showConfirmation = (title, message, onConfirm) => {
+                const confirmTitle = document.getElementById('confirm-title');
+                const confirmMessage = document.getElementById('confirm-message');
+                const confirmActionBtn = document.getElementById('confirm-action-btn');
+                const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+
+                confirmTitle.textContent = title;
+                confirmMessage.textContent = message;
+
+                const actionHandler = () => {
+                    onConfirm();
+                    closeModal(confirmModal);
+                    confirmActionBtn.removeEventListener('click', actionHandler);
+                };
+                
+                confirmActionBtn.addEventListener('click', actionHandler);
+                confirmCancelBtn.onclick = () => closeModal(confirmModal);
+                
+                openModal(confirmModal);
+            };
+            
+            const showToast = (message) => {
+                toastMessage.textContent = message;
+                toast.classList.remove('-translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+                setTimeout(() => {
+                    toast.classList.add('-translate-y-20', 'opacity-0');
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                }, 2000);
+            };
+
             // --- RENDER FUNCTIONS ---
+            const formatPrice = (price) => `$${price.toFixed(2)}`;
+
             const renderMenuItems = (items, section) => {
+                const groupedItems = items.reduce((acc, item) => {
+                    const category = item.category || 'General';
+                    if (!acc[category]) acc[category] = [];
+                    acc[category].push(item);
+                    return acc;
+                }, {});
+
                 section.innerHTML = ''; 
                 if (items.length === 0) {
                     section.innerHTML = `<p class="text-center text-gray-500 col-span-full">No items found.</p>`;
                     return;
                 }
-                items.forEach(item => {
+
+                Object.keys(groupedItems).forEach(category => {
+                    const categoryHeader = document.createElement('h3');
+                    categoryHeader.className = 'font-bold text-lg text-gray-700 pt-4';
+                    categoryHeader.textContent = category;
+                    section.appendChild(categoryHeader);
+
+                    groupedItems[category].forEach(item => {
+                        const itemElement = document.createElement('div');
+                        const isUnavailable = !item.isAvailable;
+                        itemElement.className = `menu-item-card bg-white rounded-xl p-3 flex items-center space-x-4 border border-gray-200 transition-shadow ${isUnavailable ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md active:scale-95'}`;
+                        itemElement.dataset.itemId = item.id;
+                        
+                        itemElement.innerHTML = `
+                            <div class="relative w-16 h-16 flex-shrink-0">
+                                <img src="${item.image}" alt="${item.name}" class="w-full h-full rounded-lg object-cover pointer-events-none" onerror="this.style.display='none'">
+                                ${isUnavailable ? `<div class="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center"><span class="text-white text-xs font-bold px-2 py-1 rounded-full bg-black/70">Sold Out</span></div>` : ''}
+                            </div>
+                            <div class="flex-grow pointer-events-none">
+                                <h3 class="font-semibold text-gray-800">${item.name}</h3>
+                                <p class="text-sm text-gray-500">${item.description}</p>
+                                <p class="font-bold text-blue-600 mt-2">${formatPrice(item.price || Object.values(item.sizes)[0])}</p>
+                            </div>
+                            <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center text-blue-600 text-xl font-bold pointer-events-none">
+                                +
+                            </div>
+                        `;
+                        section.appendChild(itemElement);
+                    });
+                });
+            };
+
+            const renderFeaturedItems = () => {
+                const featuredItems = [...menu.drinks, ...menu.food].filter(item => item.featured);
+                featuredCarousel.innerHTML = '';
+                featuredItems.forEach(item => {
                     const itemElement = document.createElement('div');
-                    itemElement.className = 'menu-item-card bg-white rounded-xl p-3 flex items-center space-x-4 border border-gray-200 hover:shadow-md transition-shadow active:scale-95';
+                    itemElement.className = 'menu-item-card flex-shrink-0 w-48 bg-white rounded-xl p-3 flex flex-col space-y-2 border border-gray-200 hover:shadow-md transition-shadow active:scale-95';
                     itemElement.dataset.itemId = item.id;
-                    
                     itemElement.innerHTML = `
-                        <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-lg object-contain flex-shrink-0 pointer-events-none" onerror="this.style.display='none'">
-                        <div class="flex-grow pointer-events-none">
-                            <h3 class="font-semibold text-gray-800">${item.name}</h3>
-                            <p class="text-sm text-gray-500">${item.description}</p>
-                            <p class="font-bold text-blue-600 mt-2">$${(item.price || Object.values(item.sizes)[0]).toFixed(2)}</p>
-                        </div>
-                        <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center text-blue-600 text-xl font-bold pointer-events-none">
-                            +
+                        <img src="${item.image}" class="w-24 h-24 object-cover mx-auto pointer-events-none">
+                        <div class="text-center pointer-events-none">
+                            <h3 class="font-semibold text-sm text-gray-800">${item.name}</h3>
+                            <p class="font-bold text-blue-600 text-sm">${formatPrice(item.price || Object.values(item.sizes)[0])}</p>
                         </div>
                     `;
-                    section.appendChild(itemElement);
+                    featuredCarousel.appendChild(itemElement);
                 });
             };
 
@@ -313,133 +519,164 @@
                     renderMenuItems(menu.drinks, drinksSection);
                     renderMenuItems(menu.food, foodSection);
                 }
+                renderFeaturedItems();
             };
             
             const renderCart = () => {
                 cartItemsContainer.innerHTML = '';
-                const { totalPrice } = getCartTotals();
-                if (cart.length === 0) {
+                const { subtotal, tax, totalPrice } = getCartTotals();
+                if (Object.keys(cart).length === 0) {
                     cartItemsContainer.innerHTML = `<p class="text-center text-gray-500">Your cart is empty.</p>`;
                 } else {
-                    cart.forEach(item => {
+                    Object.values(cart).forEach(cartItem => {
+                        const { item, quantity, customizations, instructions } = cartItem;
                         const cartItemEl = document.createElement('div');
                         cartItemEl.className = 'flex items-center bg-white p-2 rounded-lg';
                         let detailsHtml = '';
-                        if (item.customizations) {
-                            detailsHtml += `<p class="text-xs text-gray-500">Size: ${item.customizations.size}`;
-                            if(item.customizations.sugar) detailsHtml += `, Sugar: ${item.customizations.sugar}, Ice: ${item.customizations.ice}`;
+                        if (customizations) {
+                            detailsHtml += `<p class="text-xs text-gray-500">Size: ${customizations.size}`;
+                            if(customizations.sugar) detailsHtml += `, Sugar: ${customizations.sugar}, Ice: ${customizations.ice}`;
                             detailsHtml += `</p>`;
                         }
-                        if(item.instructions) {
-                            detailsHtml += `<p class="text-xs text-gray-400 italic">"${item.instructions}"</p>`;
+                        if(instructions) {
+                            detailsHtml += `<p class="text-xs text-gray-400 italic">"${instructions}"</p>`;
                         }
 
                         cartItemEl.innerHTML = `
-                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-md object-contain">
+                            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-md object-cover">
                             <div class="flex-grow mx-3">
                                 <p class="font-semibold">${item.name}</p>
                                 ${detailsHtml}
+                                <button data-cart-item-id="${cartItem.id}" class="edit-cart-item-btn text-xs text-blue-600 hover:underline">Edit</button>
                             </div>
-                            <div class="text-right">
-                                <p class="font-semibold">$${item.price.toFixed(2)}</p>
-                                <button data-cart-item-id="${item.cartItemId}" class="remove-from-cart-btn text-xs text-red-500 hover:text-red-700">Remove</button>
+                            <div class="flex items-center gap-2">
+                                <button data-cart-item-id="${cartItem.id}" class="cart-quantity-btn decrease-cart-qty bg-gray-200 w-7 h-7 rounded-full font-bold">-</button>
+                                <span class="w-6 text-center font-semibold">${quantity}</span>
+                                <button data-cart-item-id="${cartItem.id}" class="cart-quantity-btn increase-cart-qty bg-gray-200 w-7 h-7 rounded-full font-bold">+</button>
                             </div>
                         `;
                         cartItemsContainer.appendChild(cartItemEl);
                     });
                 }
-                modalTotalPrice.textContent = `$${totalPrice.toFixed(2)}`;
+                cartSubtotalEl.textContent = formatPrice(subtotal);
+                cartTaxEl.textContent = formatPrice(tax);
+                cartFinalTotalEl.textContent = formatPrice(totalPrice);
             };
 
-            const renderReceipt = () => {
+            const renderReceipt = (orderNumber, timestamp) => {
                 receiptItemsContainer.innerHTML = '';
                 const { totalPrice } = getCartTotals();
-                cart.forEach(item => {
+                receiptOrderNumber.textContent = orderNumber;
+                receiptTimestamp.textContent = timestamp;
+
+                Object.values(cart).forEach(cartItem => {
+                    const { item, quantity, customizations, instructions } = cartItem;
                     const receiptItemEl = document.createElement('div');
                     receiptItemEl.className = 'flex justify-between items-start text-sm';
                     let detailsHtml = '';
-                    if (item.customizations) {
-                        detailsHtml += `<span class="text-xs text-gray-400 block">(Size: ${item.customizations.size}`;
-                        if(item.customizations.sugar) detailsHtml += `, ${item.customizations.sugar} Sugar, ${item.customizations.ice} Ice`;
+                    if (customizations) {
+                        detailsHtml += `<span class="text-xs text-gray-400 block">(${quantity}x) (Size: ${customizations.size}`;
+                        if(customizations.sugar) detailsHtml += `, ${customizations.sugar} Sugar, ${customizations.ice} Ice`;
                         detailsHtml += `)</span>`;
                     }
-                    if(item.instructions) {
-                        detailsHtml += `<span class="text-xs text-gray-400 italic block">Note: "${item.instructions}"</span>`;
+                    if(instructions) {
+                        detailsHtml += `<span class="text-xs text-gray-400 italic block">Note: "${instructions}"</span>`;
                     }
 
                     receiptItemEl.innerHTML = `
                         <div><p class="font-medium">${item.name}</p>${detailsHtml}</div>
-                        <p class="font-medium">$${item.price.toFixed(2)}</p>
+                        <p class="font-medium">${formatPrice(item.price * quantity)}</p>
                     `;
                     receiptItemsContainer.appendChild(receiptItemEl);
                 });
-                receiptTotalPrice.textContent = `$${totalPrice.toFixed(2)}`;
+                receiptTotalPrice.textContent = formatPrice(totalPrice);
             };
 
             // --- LOGIC ---
-            const getCartTotals = () => ({ totalItems: cart.length, totalPrice: cart.reduce((sum, item) => sum + item.price, 0) });
+            const getCartTotals = () => {
+                const subtotal = Object.values(cart).reduce((sum, item) => sum + (item.item.price * item.quantity), 0);
+                const tax = subtotal * 0.10;
+                const totalPrice = subtotal + tax;
+                const totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+                return { totalItems, subtotal, tax, totalPrice };
+            };
+
             const updateCartBar = () => {
                 const { totalItems, totalPrice } = getCartTotals();
                 if (totalItems === 0) cartBar.style.transform = 'translateY(150%)';
                 else {
                     cartSummary.textContent = `${totalItems} item${totalItems > 1 ? 's' : ''} in cart`;
-                    cartTotal.textContent = `Total: $${totalPrice.toFixed(2)}`;
+                    cartTotal.textContent = `Total: ${formatPrice(totalPrice)}`;
                     cartBar.style.transform = 'translateY(0)';
                 }
             };
 
-            const addToCart = (item, customizations, quantity = 1, instructions = '') => {
+            const generateCartItemId = (item, customizations, instructions) => {
+                let id = item.id;
+                if (customizations) {
+                    if (customizations.size) id += `-${customizations.size}`;
+                    if (customizations.sugar) id += `-${customizations.sugar}`;
+                    if (customizations.ice) id += `-${customizations.ice}`;
+                }
+                if (instructions) id += `-${instructions}`;
+                return id;
+            };
+            
+            const addToCart = (item, customizations, quantity, instructions, isEditing = false, oldCartId = null) => {
+                const cartItemId = generateCartItemId(item, customizations, instructions);
                 const price = customizations && customizations.size ? item.sizes[customizations.size] : item.price;
-                for (let i = 0; i < quantity; i++) {
-                    cart.push({ ...item, cartItemId: `cart-${Date.now()}-${Math.random()}`, customizations, price, instructions });
+
+                if (isEditing && oldCartId) {
+                    delete cart[oldCartId];
+                }
+
+                if (cart[cartItemId]) {
+                    cart[cartItemId].quantity += quantity;
+                } else {
+                    cart[cartItemId] = {
+                        id: cartItemId,
+                        item: { ...item, price },
+                        quantity,
+                        customizations,
+                        instructions
+                    };
                 }
                 updateCartBar();
                 if (window.Telegram && window.Telegram.WebApp) Telegram.WebApp.HapticFeedback.impactOccurred('light');
             };
 
-            const removeFromCart = (cartItemId) => {
-                cart = cart.filter(item => item.cartItemId !== cartItemId);
-                updateCartBar();
-                renderCart();
+            const updateCartQuantity = (cartItemId, change) => {
+                if (cart[cartItemId]) {
+                    cart[cartItemId].quantity += change;
+                    if (cart[cartItemId].quantity <= 0) {
+                        delete cart[cartItemId];
+                    }
+                    renderCart();
+                    updateCartBar();
+                }
             };
-
-            const flyToCart = (startElement) => {
-                const endElement = viewCartBtn;
-                const clone = startElement.cloneNode(true);
-                const startRect = startElement.getBoundingClientRect();
-                const endRect = endElement.getBoundingClientRect();
-                clone.style.position = 'fixed';
-                clone.style.left = `${startRect.left}px`;
-                clone.style.top = `${startRect.top}px`;
-                clone.style.width = `${startRect.width}px`;
-                clone.style.height = `${startRect.height}px`;
-                clone.classList.add('fly-to-cart');
-                document.body.appendChild(clone);
-                setTimeout(() => {
-                    clone.style.left = `${endRect.left + endRect.width / 2}px`;
-                    clone.style.top = `${endRect.top + endRect.height / 2}px`;
-                    clone.style.width = '0px';
-                    clone.style.height = '0px';
-                    clone.style.opacity = '0';
-                }, 10);
-                setTimeout(() => clone.remove(), 500);
-            };
-
-            const openItemDetailModal = (item) => {
+            
+            const openItemDetailModal = (item, existingCartItem = null) => {
                 const itemDetailModalContent = document.getElementById('item-detail-modal-content');
                 
-                let quantity = 1;
-                let selectedSize = item.type === 'drink' ? Object.keys(item.sizes)[0] : null;
+                let quantity = existingCartItem ? existingCartItem.quantity : 1;
+                let selectedSize = existingCartItem?.customizations?.size || (item.type === 'drink' ? Object.keys(item.sizes)[0] : null);
                 let currentPrice = item.type === 'drink' ? item.sizes[selectedSize] : item.price;
-                let selectedSugar = '100%';
-                let selectedIce = '100%';
+                let selectedSugar = existingCartItem?.customizations?.sugar || '100%';
+                let selectedIce = existingCartItem?.customizations?.ice || '100%';
+                let instructions = existingCartItem ? existingCartItem.instructions : '';
 
                 const updatePriceAndButton = () => {
                     const priceDisplay = itemDetailModalContent.querySelector('#item-price');
                     const addButton = itemDetailModalContent.querySelector('#confirm-add-item-btn');
                     currentPrice = item.type === 'drink' ? item.sizes[selectedSize] : item.price;
-                    priceDisplay.textContent = `$${(currentPrice * quantity).toFixed(2)}`;
-                    addButton.textContent = `Add ${quantity} to Cart - $${(currentPrice * quantity).toFixed(2)}`;
+                    priceDisplay.textContent = formatPrice(currentPrice * quantity);
+                    if (!priceDisplay.classList.contains('price-flash-animation')) {
+                        priceDisplay.classList.add('price-flash-animation');
+                        setTimeout(() => priceDisplay.classList.remove('price-flash-animation'), 300);
+                    }
+                    const buttonText = existingCartItem ? `Update Item` : `Add ${quantity} to Cart`;
+                    addButton.textContent = `${buttonText} - ${formatPrice(currentPrice * quantity)}`;
                 };
 
                 let sizeOptionsHTML = '';
@@ -447,7 +684,7 @@
                     sizeOptionsHTML = `
                         <div>
                             <h3 class="font-semibold mb-2">Size</h3>
-                            <div id="size-options" class="flex flex-wrap gap-2">${Object.keys(item.sizes).map(size => `<button data-value="${size}" class="option-btn size-option border border-gray-300 rounded-full px-5 py-1.5 text-sm">${size}</button>`).join('')}</div>
+                            <div id="size-options" class="flex flex-wrap gap-2">${Object.keys(item.sizes).map(size => `<button data-value="${size}" class="option-btn size-option border border-gray-300 rounded-full px-5 py-1.5 text-sm relative">${size} ${size === 'M' ? '<span class="absolute -top-2 -right-2 text-xs bg-yellow-400 text-yellow-900 font-semibold px-1.5 py-0.5 rounded-full">Rec.</span>': ''}</button>`).join('')}</div>
                         </div>
                     `;
                 }
@@ -467,7 +704,7 @@
                 }
 
                 itemDetailModalContent.innerHTML = `
-                    <div class="relative w-full h-48 bg-gray-200 rounded-t-2xl flex items-center justify-center">
+                    <div class="relative w-full h-48 bg-white rounded-t-2xl flex items-center justify-center" id="detail-drag-handle">
                         <img src="${item.image}" class="w-32 h-32 object-contain">
                         <button class="close-modal-btn absolute top-4 right-4 bg-black/20 p-1 rounded-full text-white hover:bg-black/40 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -479,9 +716,10 @@
                                 <h2 class="text-2xl font-bold">${item.name}</h2>
                                 <p class="text-sm text-gray-500 mt-1">${item.description}</p>
                             </div>
-                            <span id="item-price" class="text-2xl font-bold text-blue-600">$${currentPrice.toFixed(2)}</span>
+                            <span id="item-price" class="text-2xl font-bold text-blue-600">${formatPrice(currentPrice)}</span>
                         </div>
-                        <div class="space-y-4 mt-4">
+                        <div class="border-t border-gray-200 my-4"></div>
+                        <div class="space-y-4">
                             <div class="flex justify-between items-center">
                                 <h3 class="font-semibold">Quantity</h3>
                                 <div class="flex items-center gap-4">
@@ -494,7 +732,7 @@
                             ${drinkOptionsHTML}
                             <div>
                                 <h3 class="font-semibold mb-2">Special Instructions</h3>
-                                <textarea id="special-instructions" class="w-full p-2 border border-gray-300 rounded-lg text-sm" rows="2" placeholder="e.g. extra caramel, no whipped cream..."></textarea>
+                                <textarea id="special-instructions" class="w-full p-2 border border-gray-300 rounded-lg text-sm" rows="2" placeholder="e.g. extra caramel, no whipped cream...">${instructions}</textarea>
                             </div>
                             <div>
                                 <a href="#" id="nutrition-toggle" class="text-sm text-blue-600">Nutrition & Allergens</a>
@@ -505,7 +743,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="p-4 border-t border-gray-200">
+                    <div class="p-4 border-t border-gray-200 bg-gray-100 sticky bottom-0">
                          <button id="confirm-add-item-btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors disabled:bg-gray-400">Add to Cart</button>
                     </div>
                 `;
@@ -524,6 +762,13 @@
                     qtyDisplay.textContent = quantity;
                     updatePriceAndButton();
                 };
+
+                itemDetailModalContent.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.target.classList.add('pop-animation');
+                        setTimeout(() => e.target.classList.remove('pop-animation'), 200);
+                    });
+                });
 
                 if (item.type === 'drink') {
                     const sizeOptions = itemDetailModalContent.querySelector('#size-options');
@@ -570,16 +815,33 @@
                     itemDetailModalContent.querySelectorAll('.option-btn, #decrease-qty, #increase-qty, #special-instructions').forEach(el => el.disabled = true);
                 } else {
                     confirmBtn.addEventListener('click', () => {
-                        const instructions = itemDetailModalContent.querySelector('#special-instructions').value;
+                        const newInstructions = itemDetailModalContent.querySelector('#special-instructions').value;
                         const customizations = {
                             size: selectedSize,
                             sugar: item.type === 'drink' ? selectedSugar : null,
                             ice: item.type === 'drink' ? selectedIce : null,
                         };
-                        addToCart(item, customizations, quantity, instructions);
+                        addToCart(item, customizations, quantity, newInstructions, !!existingCartItem, existingCartItem?.id);
                         closeModal(itemDetailModal);
                     });
                 }
+                
+                let startY;
+                const handle = itemDetailModalContent.querySelector('#detail-drag-handle');
+                handle.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                    itemDetailModalContent.style.transition = 'none';
+                });
+                handle.addEventListener('touchmove', (e) => {
+                    const diffY = e.touches[0].clientY - startY;
+                    if (diffY > 0) itemDetailModalContent.style.transform = `translateY(${diffY}px)`;
+                });
+                handle.addEventListener('touchend', (e) => {
+                    const diffY = e.changedTouches[0].clientY - startY;
+                    itemDetailModalContent.style.transition = 'transform 0.3s ease-in-out';
+                    if (diffY > 100) closeModal(itemDetailModal);
+                    else itemDetailModalContent.style.transform = 'translateY(0)';
+                });
 
                 openModal(itemDetailModal);
             };
@@ -603,9 +865,24 @@
             foodTab.addEventListener('click', () => switchTab('food'));
 
             viewCartBtn.addEventListener('click', () => { renderCart(); openModal(cartModal); });
-            checkoutBtn.addEventListener('click', () => { if (cart.length > 0) { closeModal(cartModal, true); renderReceipt(); openModal(receiptModal); } });
-            newOrderBtn.addEventListener('click', () => { closeModal(receiptModal); cart = []; updateCartBar(); });
-            emptyCartBtn.addEventListener('click', () => { cart = []; renderCart(); updateCartBar(); });
+            checkoutBtn.addEventListener('click', () => { 
+                if (Object.keys(cart).length > 0) {
+                    closeModal(cartModal, true); 
+                    const orderNumber = `#MUY-${Math.floor(Math.random() * 90000) + 10000}`;
+                    const timestamp = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+                    renderReceipt(orderNumber, timestamp); 
+                    openModal(receiptModal); 
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                } 
+            });
+            newOrderBtn.addEventListener('click', () => { closeModal(receiptModal); cart = {}; updateCartBar(); });
+            emptyCartBtn.addEventListener('click', () => {
+                showConfirmation('Empty Cart', 'Are you sure you want to remove all items from your cart?', () => {
+                    cart = {};
+                    renderCart();
+                    updateCartBar();
+                });
+            });
 
             searchIconBtn.addEventListener('click', () => {
                 navBox.classList.add('is-searching');
@@ -626,7 +903,7 @@
                 const query = e.target.value.toLowerCase();
                 const allItems = [...menu.drinks, ...menu.food];
                 const filteredItems = allItems.filter(item => item.name.toLowerCase().includes(query));
-                renderMenuItems(filteredItems, searchResultsSection);
+                renderAllSections(query);
             });
 
             document.body.addEventListener('click', (e) => {
@@ -634,29 +911,108 @@
                     const itemId = e.target.closest('.menu-item-card').dataset.itemId;
                     const allItems = [...menu.drinks, ...menu.food];
                     const item = allItems.find(i => i.id === itemId);
-                    openItemDetailModal(item);
+                    if (item.isAvailable) {
+                        openItemDetailModal(item);
+                    }
                 }
-                if (e.target.closest('.remove-from-cart-btn')) removeFromCart(e.target.closest('.remove-from-cart-btn').dataset.cartItemId);
+                 if (e.target.closest('.cart-quantity-btn')) {
+                    const cartItemId = e.target.closest('.cart-quantity-btn').dataset.cartItemId;
+                    const change = e.target.classList.contains('increase-cart-qty') ? 1 : -1;
+                    updateCartQuantity(cartItemId, change);
+                }
+                if (e.target.closest('.edit-cart-item-btn')) {
+                    const cartItemId = e.target.closest('.edit-cart-item-btn').dataset.cartItemId;
+                    const cartItem = cart[cartItemId];
+                    if (cartItem) {
+                        closeModal(cartModal, true);
+                        openItemDetailModal(cartItem.item, cartItem);
+                    }
+                }
                 if (e.target.closest('.close-modal-btn')) closeModal(e.target.closest('.modal'));
             });
 
             backdrop.addEventListener('click', () => {
-                document.querySelectorAll('.modal').forEach(modal => {
-                    if (!modal.classList.contains('hidden')) {
-                        closeModal(modal);
-                    }
+                document.querySelectorAll('.modal:not(#modal-backdrop):not(.hidden)').forEach(modal => {
+                    closeModal(modal);
                 });
             });
 
+            shareReceiptBtn.addEventListener('click', () => {
+                const { totalPrice } = getCartTotals();
+                let receiptText = `My MUY Café Order (${receiptOrderNumber.textContent}):\n\n`;
+                Object.values(cart).forEach(cartItem => {
+                    const { item, quantity, customizations, instructions } = cartItem;
+                    receiptText += `${quantity}x ${item.name}`;
+                    if(customizations) receiptText += ` (Size: ${customizations.size}, Sugar: ${customizations.sugar}, Ice: ${customizations.ice})`;
+                    if(instructions) receiptText += `\n  - Notes: ${instructions}`;
+                    receiptText += `\n`;
+                });
+                receiptText += `\nTotal: ${formatPrice(totalPrice)}`;
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'My MUY Café Order',
+                        text: receiptText,
+                    }).catch((error) => {
+                        console.error('Share failed:', error);
+                        const textArea = document.createElement("textarea");
+                        textArea.value = receiptText;
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            showToast('Receipt copied to clipboard!');
+                        } catch (err) {
+                            showToast('Could not copy receipt.');
+                        }
+                        document.body.removeChild(textArea);
+                    });
+                } else {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = receiptText;
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        showToast('Receipt copied to clipboard!');
+                    } catch (err) {
+                        showToast('Could not copy receipt.');
+                    }
+                    document.body.removeChild(textArea);
+                }
+            });
+            
             // --- INITIALIZATION ---
+            const initApp = () => {
+                renderFeaturedItems();
+                renderAllSections();
+                switchTab('drinks');
+                
+                skeletonLoader.style.display = 'none';
+                mainContent.style.opacity = '1';
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('.menu-item-card').forEach(card => {
+                    observer.observe(card);
+                });
+            };
+
             if (window.Telegram && window.Telegram.WebApp) {
                 Telegram.WebApp.ready();
                 Telegram.WebApp.setHeaderColor('#F3F4F6');
                 Telegram.WebApp.setBackgroundColor('#F3F4F6');
             }
-            renderMenuItems(menu.drinks, drinksSection);
-            renderMenuItems(menu.food, foodSection);
-            switchTab('drinks');
+            setTimeout(initApp, 500);
         });
     </script>
 
