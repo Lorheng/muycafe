@@ -47,6 +47,7 @@
         #featured-carousel {
             -ms-overflow-style: none;  /* IE and Edge */
             scrollbar-width: none;  /* Firefox */
+            overflow-y: hidden; /* Prevent vertical scroll */
         }
         /* Transitions for modals */
         .modal {
@@ -132,6 +133,22 @@
         /* Toast notification */
         #toast {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .image-placeholder {
+            background-color: #e5e7eb;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            50% {
+                opacity: .5;
+            }
+        }
+        .image-container img {
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .image-container img.loaded {
+            opacity: 1;
         }
     </style>
 </head>
@@ -313,7 +330,7 @@
     </div>
     
     <!-- Full-Screen Image Modal -->
-    <div id="image-modal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div id="image-modal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity">
         <div class="relative">
             <img id="modal-image" src="" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl">
             <button id="close-image-modal-btn" class="absolute -top-3 -right-3 bg-white rounded-full p-1 shadow-lg">
@@ -388,30 +405,48 @@
             const shareReceiptBtn = document.getElementById('share-receipt-btn');
 
             // --- GENERAL MODAL FUNCTIONS ---
-            const openModal = (modal) => {
-                document.body.classList.add('modal-open');
-                backdrop.classList.remove('hidden');
+            const openModal = (modal, isOverlay = false) => {
+                if (!isOverlay) {
+                    document.body.classList.add('modal-open');
+                    backdrop.classList.remove('hidden');
+                }
                 modal.classList.remove('hidden');
+                
                 requestAnimationFrame(() => {
-                    backdrop.classList.remove('opacity-0');
+                    if (!isOverlay) {
+                        backdrop.classList.remove('opacity-0');
+                    }
                     const content = modal.querySelector('.modal-content');
-                    if(content) content.classList.remove('translate-y-full', 'scale-95', 'opacity-0');
+                    if(content) {
+                        content.classList.remove('translate-y-full', 'scale-95', 'opacity-0');
+                    } else {
+                        modal.classList.remove('opacity-0');
+                    }
                 });
             };
 
             const closeModal = (modal, keepBackdrop = false) => {
-                if (!keepBackdrop) {
-                    backdrop.classList.add('opacity-0');
-                    document.body.classList.remove('modal-open');
-                }
                 const content = modal.querySelector('.modal-content');
                 if(content) {
-                    if (modal.id === 'receipt-modal' || modal.id === 'confirm-modal') content.classList.add('scale-95', 'opacity-0');
-                    else content.classList.add('translate-y-full');
+                    if (modal.id === 'receipt-modal' || modal.id === 'confirm-modal') {
+                        content.classList.add('scale-95', 'opacity-0');
+                    } else {
+                        content.classList.add('translate-y-full');
+                    }
+                } else {
+                    modal.classList.add('opacity-0');
                 }
+
+                if (!keepBackdrop) {
+                    backdrop.classList.add('opacity-0');
+                }
+
                 setTimeout(() => {
-                    if (!keepBackdrop) backdrop.classList.add('hidden');
                     modal.classList.add('hidden');
+                    if (!keepBackdrop) {
+                        backdrop.classList.add('hidden');
+                        document.body.classList.remove('modal-open');
+                    }
                 }, 300);
             };
 
@@ -451,6 +486,17 @@
                 if (typeof price !== 'number' || isNaN(price)) return '$0.00';
                 return `$${price.toFixed(2)}`;
             }
+
+            const loadImage = (imgElement) => {
+                const placeholder = imgElement.parentElement;
+                const newImg = new Image();
+                newImg.src = imgElement.dataset.src;
+                newImg.onload = () => {
+                    imgElement.src = newImg.src;
+                    imgElement.classList.add('loaded');
+                    placeholder.classList.remove('image-placeholder');
+                };
+            };
 
             const setupScrollAnimations = (container) => {
                 const observer = new IntersectionObserver((entries) => {
@@ -498,8 +544,9 @@
                         itemElement.dataset.itemId = item.id;
                         
                         itemElement.innerHTML = `
-                            <div class="relative w-20 h-20 flex-shrink-0">
-                                <img src="${item.image}" alt="${item.name}" class="w-full h-full rounded-lg object-cover pointer-events-none" onerror="this.style.display='none'">
+                            <div class="relative w-20 h-20 flex-shrink-0 image-container">
+                                <div class="w-full h-full rounded-lg image-placeholder"></div>
+                                <img data-src="${item.image}" alt="${item.name}" class="absolute inset-0 w-full h-full rounded-lg object-cover" onerror="this.style.display='none'">
                                 ${isUnavailable ? `<div class="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center"><span class="text-white text-xs font-bold px-2 py-1 rounded-full bg-black/70">Sold Out</span></div>` : ''}
                                 ${item.promoTag ? `<div class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full transform rotate-12">${item.promoTag}</div>` : ''}
                             </div>
@@ -517,6 +564,7 @@
                             </div>
                         `;
                         section.appendChild(itemElement);
+                        loadImage(itemElement.querySelector('img'));
                     });
                 });
                 setupScrollAnimations(section);
@@ -547,8 +595,9 @@
                     itemElement.className = 'menu-item-card flex-shrink-0 w-48 bg-white rounded-xl p-3 flex flex-col space-y-2 border border-gray-200 hover:shadow-md transition-shadow active:scale-95';
                     itemElement.dataset.itemId = item.id;
                     itemElement.innerHTML = `
-                        <div class="relative">
-                            <img src="${item.image}" class="w-28 h-28 object-cover mx-auto pointer-events-none rounded-lg">
+                        <div class="relative image-container">
+                            <div class="w-28 h-28 mx-auto rounded-lg image-placeholder"></div>
+                            <img data-src="${item.image}" class="absolute inset-0 w-28 h-28 object-cover mx-auto pointer-events-none rounded-lg">
                             ${item.promoTag ? `<div class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full transform rotate-12">${item.promoTag}</div>` : ''}
                         </div>
                         <div class="text-center pointer-events-none">
@@ -559,6 +608,7 @@
                         </div>
                     `;
                     featuredCarousel.appendChild(itemElement);
+                    loadImage(itemElement.querySelector('img'));
                 });
                 setupScrollAnimations(featuredCarousel);
             };
@@ -869,7 +919,7 @@
 
                 itemDetailModalContent.querySelector('#item-detail-image').addEventListener('click', () => {
                     modalImage.src = item.image;
-                    openModal(imageModal);
+                    openModal(imageModal, true);
                 });
 
                 const confirmBtn = itemDetailModalContent.querySelector('#confirm-add-item-btn');
@@ -1008,8 +1058,11 @@
                 if (e.target.closest('.close-modal-btn')) closeModal(e.target.closest('.modal'));
             });
 
-            imageModal.addEventListener('click', () => closeModal(imageModal));
-            closeImageModalBtn.addEventListener('click', () => closeModal(imageModal));
+            imageModal.addEventListener('click', () => closeModal(imageModal, true));
+            closeImageModalBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeModal(imageModal, true);
+            });
 
             shareReceiptBtn.addEventListener('click', () => {
                 const { totalPrice } = getCartTotals();
