@@ -13,7 +13,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 5 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": 0.2,
+    "promoTag": "20% OFF"
   },
   {
     "id": "d2",
@@ -29,7 +31,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 15 calories.",
     "allergens": "None",
-    "featured": "TRUE"
+    "featured": "TRUE",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d3",
@@ -45,7 +49,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 120-180 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d4",
@@ -61,7 +67,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Around 120 calories.",
     "allergens": "Milk",
-    "featured": "TRUE"
+    "featured": "TRUE",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d5",
@@ -77,7 +85,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 100 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": 0.11,
+    "promoTag": "SALE!"
   },
   {
     "id": "d6",
@@ -93,7 +103,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 200-300 calories.",
     "allergens": "Milk",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d7",
@@ -109,7 +121,9 @@
     "isAvailable": "TRUE",
     "nutrition": "About 2 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d8",
@@ -125,7 +139,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 200 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d9",
@@ -141,7 +157,9 @@
     "isAvailable": "TRUE",
     "nutrition": 120,
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": 0.4,
+    "promoTag": "99% OFF"
   },
   {
     "id": "d10",
@@ -157,7 +175,9 @@
     "isAvailable": "TRUE",
     "nutrition": "About 5 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d11",
@@ -173,7 +193,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Ice Latte: ~60-120 calories",
     "allergens": "Milk",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d12",
@@ -189,7 +211,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 240 calories.",
     "allergens": "Milk",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d13",
@@ -205,7 +229,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 250-350 calories.",
     "allergens": "Milk",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d14",
@@ -221,7 +247,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 250 calories.",
     "allergens": "Milk",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d15",
@@ -237,7 +265,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 280 calories.",
     "allergens": "Milk, Soy",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d16",
@@ -253,7 +283,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 70 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d17",
@@ -269,7 +301,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 100 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d18",
@@ -285,7 +319,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 250 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d19",
@@ -301,7 +337,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 45 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d20",
@@ -317,7 +355,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 120 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d21",
@@ -333,7 +373,9 @@
     "isAvailable": "TRUE",
     "nutrition": "10 calories",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d22",
@@ -349,7 +391,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 20 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d23",
@@ -365,7 +409,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 150 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d24",
@@ -381,12 +427,14 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 150-250 calories.",
     "allergens": "Milk",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d25",
     "name": "Sting",
-    "description": "I am sorry, I cannot provide a description of a local beverage in Cambodia. Can you please provide more information?",
+    "description": "A popular energy drink in Cambodia, known for its strong, vibrant flavors and association with sports and gaming",
     "image": "https://github.com/Lorheng/muycafe/blob/main/images/Gemini_Generated_Image_j6oevfj6oevfj6oe.png?raw=true",
     "type": "drink",
     "category": "Soft Drinks",
@@ -395,9 +443,11 @@
     "sizes\\_L": "",
     "price": 0.49,
     "isAvailable": "TRUE",
-    "nutrition": "I am unable to answer your question, because I do not have the menu items. Please provide the menu items so I can provide an estimated calorie count for each.",
+    "nutrition": "Approximately 140 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d26",
@@ -413,7 +463,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 140 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d27",
@@ -427,9 +479,11 @@
     "sizes\\_L": "",
     "price": 0.61,
     "isAvailable": "TRUE",
-    "nutrition": "I am sorry, I cannot fulfill this request. I am unable to provide nutritional information for food items.",
+    "nutrition": "Approximately 140 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d28",
@@ -445,7 +499,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 110 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d29",
@@ -461,7 +517,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Champion: Approximately 300 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "d30",
@@ -477,7 +535,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Calorie count: approximately 100 calories.",
     "allergens": "None",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f1",
@@ -493,7 +553,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 600-800 calories.",
     "allergens": "Soy, gluten.",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f2",
@@ -509,7 +571,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 450 calories.",
     "allergens": "Soy, Wheat, Gluten, and Eggs.",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f3",
@@ -525,7 +589,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Pork Noodle Soup: Approximately 350-500 calories.",
     "allergens": "Soy, wheat, and sesame.",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f4",
@@ -541,7 +607,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 800 calories.",
     "allergens": "Soy, wheat, and sesame.",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f5",
@@ -557,7 +625,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 600 calories.",
     "allergens": "Soy, wheat.",
-    "featured": "TRUE"
+    "featured": "TRUE",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f6",
@@ -573,7 +643,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 650 calories.",
     "allergens": "Gluten, Eggs, and Milk.",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f7",
@@ -589,7 +661,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 700 calories.",
     "allergens": "Soy, wheat, and sesame.",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f8",
@@ -605,7 +679,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 650 calories.",
     "allergens": "Eggs, soy, and possibly wheat.",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f9",
@@ -621,7 +697,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 550 calories.",
     "allergens": "Eggs, soy.",
-    "featured": "TRUE"
+    "featured": "TRUE",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f10",
@@ -637,7 +715,9 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 750 calories.",
     "allergens": "Egg, wheat, soy",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   },
   {
     "id": "f11",
@@ -653,6 +733,8 @@
     "isAvailable": "TRUE",
     "nutrition": "Approximately 750 calories.",
     "allergens": "Soy, eggs, and wheat.",
-    "featured": ""
+    "featured": "",
+    "discountPrice": "",
+    "promoTag": ""
   }
 ]
