@@ -762,7 +762,7 @@
 
                 itemDetailModalContent.innerHTML = `
                     <div class="relative w-full h-48 bg-white rounded-t-2xl flex items-center justify-center" id="detail-drag-handle">
-                        <img src="${item.image}" class="w-32 h-32 object-contain">
+                        <img src="${item.image}" class="w-32 h-32 object-contain cursor-pointer" id="item-detail-image">
                         <button class="close-modal-btn absolute top-4 right-4 bg-black/20 p-1 rounded-full text-white hover:bg-black/40 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
@@ -865,6 +865,11 @@
                 itemDetailModalContent.querySelector('#nutrition-toggle').addEventListener('click', (e) => {
                     e.preventDefault();
                     itemDetailModalContent.querySelector('#nutrition-details').classList.toggle('expanded');
+                });
+
+                itemDetailModalContent.querySelector('#item-detail-image').addEventListener('click', () => {
+                    modalImage.src = item.image;
+                    openModal(imageModal);
                 });
 
                 const confirmBtn = itemDetailModalContent.querySelector('#confirm-add-item-btn');
@@ -1003,11 +1008,8 @@
                 if (e.target.closest('.close-modal-btn')) closeModal(e.target.closest('.modal'));
             });
 
-            backdrop.addEventListener('click', () => {
-                document.querySelectorAll('.modal:not(#modal-backdrop):not(.hidden)').forEach(modal => {
-                    closeModal(modal);
-                });
-            });
+            imageModal.addEventListener('click', () => closeModal(imageModal));
+            closeImageModalBtn.addEventListener('click', () => closeModal(imageModal));
 
             shareReceiptBtn.addEventListener('click', () => {
                 const { totalPrice } = getCartTotals();
@@ -1097,6 +1099,7 @@
                     welcomeHeader.textContent = 'Good Evening!';
                 }
                 
+                switchFeaturedTab(currentFeaturedTab);
                 renderAllSections();
                 updateCartBar();
                 
