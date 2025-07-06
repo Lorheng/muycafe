@@ -41,10 +41,10 @@
             border-radius: 2px;
         }
         /* Hide scrollbar for the featured carousel */
-        #featured-carousel::-webkit-scrollbar, #suggestions-carousel::-webkit-scrollbar {
+        #featured-carousel::-webkit-scrollbar {
             display: none;
         }
-        #featured-carousel, #suggestions-carousel {
+        #featured-carousel {
             -ms-overflow-style: none;  /* IE and Edge */
             scrollbar-width: none;  /* Firefox */
         }
@@ -63,6 +63,13 @@
         }
         .menu-item-card {
             cursor: pointer;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .menu-item-card.is-visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         /* Search/Nav transition styles */
         #nav-box.is-searching #tabs-container {
@@ -102,6 +109,26 @@
         .pop-animation {
             animation: pop-animation 0.2s ease-out;
         }
+        /* Skeleton loading styles */
+        .skeleton-card {
+            background-color: #e5e7eb; /* bg-gray-200 */
+            border-radius: 0.75rem; /* rounded-xl */
+            padding: 0.75rem; /* p-3 */
+            display: flex;
+            align-items: center;
+            gap: 1rem; /* space-x-4 */
+        }
+        .skeleton-img {
+            width: 5rem; /* w-20 */
+            height: 5rem; /* h-20 */
+            background-color: #d1d5db; /* bg-gray-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+        .skeleton-text {
+            height: 0.75rem; /* h-3 */
+            background-color: #d1d5db; /* bg-gray-300 */
+            border-radius: 0.25rem; /* rounded-md */
+        }
         /* Toast notification */
         #toast {
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -110,19 +137,24 @@
 </head>
 <body class="bg-gray-100 text-gray-800 overflow-x-hidden">
 
-    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-48">
+    <div id="app-container" class="max-w-lg mx-auto min-h-screen bg-gray-100 pb-64">
         
         <!-- Header -->
         <header class="text-center p-6">
             <h1 class="text-3xl font-bold tracking-tight text-blue-600">MUY Café</h1>
-            <p class="text-gray-500 mt-1">Freshly brewed, just for you.</p>
+            <p id="welcome-header" class="text-gray-500 mt-1">Freshly brewed, just for you.</p>
         </header>
 
-        <!-- Featured Items Carousel -->
+        <!-- Featured Carousel Section -->
         <section class="mb-6">
-            <h2 class="font-bold text-lg px-4 mb-2">Popular Items</h2>
+            <div class="flex justify-center mb-2">
+                <div class="inline-flex rounded-full bg-gray-200 p-1 text-sm font-semibold">
+                    <button id="deals-tab" class="px-4 py-1 rounded-full">Today's Deals</button>
+                    <button id="popular-tab" class="px-4 py-1 rounded-full">Popular</button>
+                </div>
+            </div>
             <div id="featured-carousel" class="flex overflow-x-auto gap-4 px-4 pb-4">
-                <!-- Featured items will be injected here -->
+                <!-- Items will be injected here -->
             </div>
         </section>
 
@@ -130,8 +162,8 @@
         <nav class="sticky top-0 bg-gray-100/80 backdrop-blur-sm z-10 px-4 py-3">
             <div id="nav-box" class="relative flex justify-center border border-gray-200 rounded-full p-1 max-w-sm mx-auto h-12">
                 <div id="tabs-container" class="absolute inset-0 flex items-center w-full transition-opacity duration-300 opacity-100">
-                    <button id="drinks-tab" class="tab-button flex-grow rounded-full p-2 text-sm font-semibold transition-colors">Drinks</button>
-                    <button id="food-tab" class="tab-button flex-grow rounded-full p-2 text-sm font-semibold transition-colors">Food</button>
+                    <button id="drinks-tab" class="tab-button flex-grow rounded-full p-2 text-sm font-semibold transition-colors bg-blue-600 text-white">Drinks</button>
+                    <button id="food-tab" class="tab-button flex-grow rounded-full p-2 text-sm font-semibold transition-colors text-gray-500">Food</button>
                     <div class="border-l border-gray-200 h-6 mx-1"></div>
                     <button id="search-icon-btn" class="p-2 rounded-full hover:bg-gray-200 flex-shrink-0">
                         <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -145,11 +177,41 @@
         </nav>
 
         <!-- Menu Items Container -->
-        <main class="px-4 mt-6">
+        <main id="main-content" class="px-4 mt-6 opacity-0 transition-opacity duration-500">
             <div id="drinks-section" class="space-y-4"></div>
             <div id="food-section" class="space-y-4 hidden"></div>
             <div id="search-results-section" class="space-y-4 hidden"></div>
         </main>
+        
+        <!-- Skeleton Loader -->
+        <div id="skeleton-loader" class="px-4 mt-6 space-y-4">
+            <div class="skeleton-card animate-pulse">
+                <div class="skeleton-img"></div>
+                <div class="flex-grow space-y-2">
+                    <div class="skeleton-text w-3/4"></div>
+                    <div class="skeleton-text w-1/2"></div>
+                </div>
+            </div>
+             <div class="skeleton-card animate-pulse">
+                <div class="skeleton-img"></div>
+                <div class="flex-grow space-y-2">
+                    <div class="skeleton-text w-3/4"></div>
+                    <div class="skeleton-text w-1/2"></div>
+                </div>
+            </div>
+             <div class="skeleton-card animate-pulse">
+                <div class="skeleton-img"></div>
+                <div class="flex-grow space-y-2">
+                    <div class="skeleton-text w-3/4"></div>
+                    <div class="skeleton-text w-1/2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="px-4 mt-6 text-center text-red-500 hidden">
+            <p>Could not load the menu. Please try again later.</p>
+        </div>
     </div>
 
     <!-- Floating Cart Bar -->
@@ -193,7 +255,6 @@
             <div class="border-t border-gray-200 pt-4">
                 <div class="space-y-1 text-sm text-gray-600 mb-4">
                     <div class="flex justify-between"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
-                    <div class="flex justify-between"><span>Tax (10%)</span><span id="cart-tax">$0.00</span></div>
                     <div class="flex justify-between font-bold text-lg text-gray-800"><span>Total</span><span id="cart-final-total">$0.00</span></div>
                 </div>
                 <button id="empty-cart-btn" class="text-xs text-red-500 hover:underline mb-4">Empty Cart</button>
@@ -250,25 +311,22 @@
             </div>
         </div>
     </div>
+    
+    <!-- Full-Screen Image Modal -->
+    <div id="image-modal" class="modal fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="relative">
+            <img id="modal-image" src="" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl">
+            <button id="close-image-modal-btn" class="absolute -top-3 -right-3 bg-white rounded-full p-1 shadow-lg">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+    </div>
 
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- DATA ---
-            const menu = {
-                drinks: [
-                    { id: 'd1', name: 'Iced Americano', description: 'Rich espresso shots over ice.', image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_q1qt28q1qt28q1qt.png?alt=media&token=bb08ee49-5047-41b8-b259-397916b76e29', type: 'drink', category: 'Coffee', sizes: {'S': 3.50, 'M': 4.00, 'L': 4.50}, isAvailable: true, nutrition: '5 Calories', allergens: 'None', featured: true },
-                    { id: 'd2', name: 'Caramel Macchiato', description: 'Creamy milk, vanilla, and espresso.', image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_kemdcbkemdcbkemd.png?alt=media&token=6aad0440-9355-456c-92c4-e50e06fe5bda', type: 'drink', category: 'Coffee', sizes: {'S': 4.75, 'M': 5.25, 'L': 5.75}, isAvailable: true, nutrition: '250 Calories', allergens: 'Contains Dairy' },
-                    { id: 'd3', name: 'Matcha Latte', description: 'Earthy green tea with steamed milk.', image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_j6oevfj6oevfj6oe.png?alt=media&token=44fbe0c7-e1fb-4399-b75c-a25f1d00bc71', type: 'drink', category: 'Tea', sizes: {'S': 5.00, 'M': 5.50, 'L': 6.00}, isAvailable: true, nutrition: '190 Calories', allergens: 'Contains Dairy' },
-                    { id: 'd4', name: 'Passionfruit Cooler', description: 'A refreshing tropical blend.', image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_nmoow0nmoow0nmoo.png?alt=media&token=3f0d97ff-6577-430c-bc31-d634f2a6a3b8', type: 'drink', category: 'Coolers', sizes: {'S': 4.25, 'M': 4.75, 'L': 5.25}, isAvailable: true, nutrition: '150 Calories', allergens: 'None' },
-                ],
-                food: [
-                    { id: 'f1', name: 'Almond Croissant', description: 'Flaky pastry with almond filling.', price: 3.75, image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_f14m6gf14m6gf14m.png?alt=media&token=c8cec1c9-436a-4e6e-9e9b-ba63e27bad0a', type: 'food', category: 'Pastries', isAvailable: true, nutrition: '400 Calories', allergens: 'Contains Nuts, Dairy, Wheat', featured: true },
-                    { id: 'f2', name: 'Avocado Toast', description: 'Sourdough with fresh avocado.', price: 8.50, image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_cv515ccv515ccv51.png?alt=media&token=f6ec5f57-2e01-4121-af28-afcad8159ed5', type: 'food', category: 'Savory', isAvailable: true, nutrition: '350 Calories', allergens: 'Contains Wheat', featured: true },
-                    { id: 'f3', name: 'Chocolate Chip Cookie', description: 'Classic, soft, and chewy.', price: 2.50, image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_2f6ung2f6ung2f6u.png?alt=media&token=686aa9cd-1124-4220-9648-19f70678223a', type: 'food', category: 'Pastries', isAvailable: true, nutrition: '220 Calories', allergens: 'Contains Dairy, Wheat' },
-                    { id: 'f4', name: 'Breakfast Burrito', description: 'Eggs, cheese, and salsa.', price: 7.00, image: 'https://firebasestorage.googleapis.com/v0/b/muy-cafe-15719.firebasestorage.app/o/Gemini_Generated_Image_owfyqnowfyqnowfy.png?alt=media&token=451a7df4-b8d5-448b-9fa6-549524919e7a', type: 'food', category: 'Savory', isAvailable: true, nutrition: '550 Calories', allergens: 'Contains Dairy, Wheat' },
-                ]
-            };
+            let menu = { drinks: [], food: [] };
             const customizationOptions = {
                 sugar: ['100%', '75%', '50%', '25%', '0%'],
                 ice: ['100%', '50%', '0%', 'No Ice']
@@ -277,10 +335,12 @@
             // --- STATE ---
             let cart = {}; 
             let currentTab = 'drinks';
+            let currentFeaturedTab = 'deals';
 
             // --- DOM ELEMENTS ---
             const welcomeHeader = document.getElementById('welcome-header');
             const featuredCarousel = document.getElementById('featured-carousel');
+            const skeletonLoader = document.getElementById('skeleton-loader');
             const mainContent = document.getElementById('main-content');
             const backdrop = document.getElementById('modal-backdrop');
             const drinksTab = document.getElementById('drinks-tab');
@@ -294,6 +354,8 @@
             const viewCartBtn = document.getElementById('view-cart-btn');
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toast-message');
+            const popularTab = document.getElementById('popular-tab');
+            const dealsTab = document.getElementById('deals-tab');
             
             // Search & Nav elements
             const navBox = document.getElementById('nav-box');
@@ -306,11 +368,13 @@
             const cartModal = document.getElementById('cart-modal');
             const receiptModal = document.getElementById('receipt-modal');
             const confirmModal = document.getElementById('confirm-modal');
+            const imageModal = document.getElementById('image-modal');
+            const modalImage = document.getElementById('modal-image');
+            const closeImageModalBtn = document.getElementById('close-image-modal-btn');
 
             // Cart Elements
             const cartItemsContainer = document.getElementById('cart-items-container');
             const cartSubtotalEl = document.getElementById('cart-subtotal');
-            const cartTaxEl = document.getElementById('cart-tax');
             const cartFinalTotalEl = document.getElementById('cart-final-total');
             const checkoutBtn = document.getElementById('checkout-btn');
             const emptyCartBtn = document.getElementById('empty-cart-btn');
@@ -328,11 +392,11 @@
                 document.body.classList.add('modal-open');
                 backdrop.classList.remove('hidden');
                 modal.classList.remove('hidden');
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     backdrop.classList.remove('opacity-0');
                     const content = modal.querySelector('.modal-content');
                     if(content) content.classList.remove('translate-y-full', 'scale-95', 'opacity-0');
-                }, 10);
+                });
             };
 
             const closeModal = (modal, keepBackdrop = false) => {
@@ -383,7 +447,25 @@
             };
 
             // --- RENDER FUNCTIONS ---
-            const formatPrice = (price) => `$${price.toFixed(2)}`;
+            const formatPrice = (price) => {
+                if (typeof price !== 'number' || isNaN(price)) return '$0.00';
+                return `$${price.toFixed(2)}`;
+            }
+
+            const setupScrollAnimations = (container) => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                container.querySelectorAll('.menu-item-card').forEach(card => {
+                    observer.observe(card);
+                });
+            };
 
             const renderMenuItems = (items, section) => {
                 const groupedItems = items.reduce((acc, item) => {
@@ -408,44 +490,77 @@
                     groupedItems[category].forEach(item => {
                         const itemElement = document.createElement('div');
                         const isUnavailable = !item.isAvailable;
-                        itemElement.className = `menu-item-card bg-white rounded-xl p-3 flex items-center space-x-4 border border-gray-200 transition-shadow ${isUnavailable ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md active:scale-95'}`;
+                        const hasDiscount = item.discountPrice && item.discountPrice > 0;
+                        const originalPrice = item.price || (item.sizes ? Object.values(item.sizes)[0] : 0);
+                        const displayPrice = hasDiscount ? item.discountPrice : originalPrice;
+
+                        itemElement.className = `menu-item-card bg-white rounded-xl p-3 grid grid-cols-[auto,1fr,auto] items-center gap-4 border border-gray-200 transition-shadow ${isUnavailable ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md active:scale-95'}`;
                         itemElement.dataset.itemId = item.id;
                         
                         itemElement.innerHTML = `
                             <div class="relative w-20 h-20 flex-shrink-0">
                                 <img src="${item.image}" alt="${item.name}" class="w-full h-full rounded-lg object-cover pointer-events-none" onerror="this.style.display='none'">
                                 ${isUnavailable ? `<div class="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center"><span class="text-white text-xs font-bold px-2 py-1 rounded-full bg-black/70">Sold Out</span></div>` : ''}
+                                ${item.promoTag ? `<div class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full transform rotate-12">${item.promoTag}</div>` : ''}
                             </div>
-                            <div class="flex-grow pointer-events-none">
-                                <h3 class="font-semibold text-gray-800">${item.name}</h3>
-                                <p class="text-sm text-gray-500">${item.description}</p>
-                                <p class="font-bold text-blue-600 mt-2">${formatPrice(item.price || Object.values(item.sizes)[0])}</p>
+                            <div class="flex-grow pointer-events-none min-w-0">
+                                <h3 class="font-semibold text-gray-800 truncate">${item.name}</h3>
+                                <p class="text-sm text-gray-500 truncate">${item.description}</p>
+                                <p class="font-bold mt-2">
+                                    ${hasDiscount ? `<span class="text-gray-500 line-through">${formatPrice(originalPrice)}</span> <span class="text-red-600">${formatPrice(displayPrice)}</span>` : `<span class="text-blue-600">${formatPrice(displayPrice)}</span>`}
+                                </p>
                             </div>
-                            <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center text-blue-600 text-xl font-bold pointer-events-none">
-                                +
+                            <div class="flex items-center justify-center">
+                                <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center text-blue-600 text-xl font-bold pointer-events-none">
+                                    +
+                                </div>
                             </div>
                         `;
                         section.appendChild(itemElement);
                     });
                 });
+                setupScrollAnimations(section);
             };
 
-            const renderFeaturedItems = () => {
-                const featuredItems = [...menu.drinks, ...menu.food].filter(item => item.featured);
+            const renderFeaturedCarousel = (type) => {
+                const allItems = [...menu.drinks, ...menu.food];
+                let itemsToShow;
+
+                if (type === 'popular') {
+                    itemsToShow = allItems.filter(item => item.featured);
+                } else { // 'deals'
+                    itemsToShow = allItems.filter(item => item.discountPrice || item.promoTag);
+                }
+                
+                if (itemsToShow.length === 0) {
+                    featuredCarousel.innerHTML = `<p class="text-center text-gray-500 w-full">No items to show.</p>`;
+                    return;
+                }
+                
                 featuredCarousel.innerHTML = '';
-                featuredItems.forEach(item => {
+                itemsToShow.forEach(item => {
                     const itemElement = document.createElement('div');
+                    const hasDiscount = item.discountPrice && item.discountPrice > 0;
+                    const originalPrice = item.price || (item.sizes ? Object.values(item.sizes)[0] : 0);
+                    const displayPrice = hasDiscount ? item.discountPrice : originalPrice;
+
                     itemElement.className = 'menu-item-card flex-shrink-0 w-48 bg-white rounded-xl p-3 flex flex-col space-y-2 border border-gray-200 hover:shadow-md transition-shadow active:scale-95';
                     itemElement.dataset.itemId = item.id;
                     itemElement.innerHTML = `
-                        <img src="${item.image}" class="w-28 h-28 object-cover mx-auto pointer-events-none rounded-lg">
+                        <div class="relative">
+                            <img src="${item.image}" class="w-28 h-28 object-cover mx-auto pointer-events-none rounded-lg">
+                            ${item.promoTag ? `<div class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full transform rotate-12">${item.promoTag}</div>` : ''}
+                        </div>
                         <div class="text-center pointer-events-none">
                             <h3 class="font-semibold text-sm text-gray-800">${item.name}</h3>
-                            <p class="font-bold text-blue-600 text-sm">${formatPrice(item.price || Object.values(item.sizes)[0])}</p>
+                             <p class="font-bold text-sm">
+                                ${hasDiscount ? `<span class="text-gray-500 line-through">${formatPrice(originalPrice)}</span> <span class="text-red-600">${formatPrice(displayPrice)}</span>` : `<span class="text-blue-600">${formatPrice(displayPrice)}</span>`}
+                            </p>
                         </div>
                     `;
                     featuredCarousel.appendChild(itemElement);
                 });
+                setupScrollAnimations(featuredCarousel);
             };
 
             const renderAllSections = (query = '') => {
@@ -459,12 +574,12 @@
                     renderMenuItems(menu.drinks, drinksSection);
                     renderMenuItems(menu.food, foodSection);
                 }
-                renderFeaturedItems();
+                renderFeaturedCarousel(currentFeaturedTab);
             };
             
             const renderCart = () => {
                 cartItemsContainer.innerHTML = '';
-                const { subtotal, tax, totalPrice } = getCartTotals();
+                const { subtotal, totalPrice } = getCartTotals();
                 if (Object.keys(cart).length === 0) {
                     cartItemsContainer.innerHTML = `<p class="text-center text-gray-500">Your cart is empty.</p>`;
                 } else {
@@ -499,7 +614,6 @@
                     });
                 }
                 cartSubtotalEl.textContent = formatPrice(subtotal);
-                cartTaxEl.textContent = formatPrice(tax);
                 cartFinalTotalEl.textContent = formatPrice(totalPrice);
             };
 
@@ -534,11 +648,13 @@
 
             // --- LOGIC ---
             const getCartTotals = () => {
-                const subtotal = Object.values(cart).reduce((sum, item) => sum + (item.item.price * item.quantity), 0);
-                const tax = subtotal * 0.10;
-                const totalPrice = subtotal + tax;
-                const totalItems = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
-                return { totalItems, subtotal, tax, totalPrice };
+                const subtotal = Object.values(cart).reduce((sum, cartItem) => {
+                    const price = parseFloat(cartItem.price) || 0;
+                    return sum + (price * cartItem.quantity);
+                }, 0);
+                const totalPrice = subtotal; // Tax logic removed
+                const totalItems = Object.values(cart).reduce((sum, cartItem) => sum + cartItem.quantity, 0);
+                return { totalItems, subtotal, totalPrice };
             };
 
             const updateCartBar = () => {
@@ -564,7 +680,7 @@
             
             const addToCart = (item, customizations, quantity, instructions, isEditing = false, oldCartId = null) => {
                 const cartItemId = generateCartItemId(item, customizations, instructions);
-                const price = customizations && customizations.size ? item.sizes[customizations.size] : item.price;
+                const price = item.discountPrice || ((customizations && customizations.size && item.sizes) ? item.sizes[customizations.size] : item.price);
 
                 if (isEditing && oldCartId) {
                     delete cart[oldCartId];
@@ -575,7 +691,8 @@
                 } else {
                     cart[cartItemId] = {
                         id: cartItemId,
-                        item: { ...item, price },
+                        item: { ...item },
+                        price: price,
                         quantity,
                         customizations,
                         instructions
@@ -600,8 +717,8 @@
                 const itemDetailModalContent = document.getElementById('item-detail-modal-content');
                 
                 let quantity = existingCartItem ? existingCartItem.quantity : 1;
-                let selectedSize = existingCartItem?.customizations?.size || (item.type === 'drink' ? Object.keys(item.sizes)[0] : null);
-                let currentPrice = item.type === 'drink' ? item.sizes[selectedSize] : item.price;
+                let selectedSize = existingCartItem?.customizations?.size || (item.sizes ? Object.keys(item.sizes)[0] : null);
+                let currentPrice = item.discountPrice || ((item.sizes && selectedSize) ? item.sizes[selectedSize] : item.price);
                 let selectedSugar = existingCartItem?.customizations?.sugar || '100%';
                 let selectedIce = existingCartItem?.customizations?.ice || '100%';
                 let instructions = existingCartItem ? existingCartItem.instructions : '';
@@ -609,7 +726,7 @@
                 const updatePriceAndButton = () => {
                     const priceDisplay = itemDetailModalContent.querySelector('#item-price');
                     const addButton = itemDetailModalContent.querySelector('#confirm-add-item-btn');
-                    currentPrice = item.type === 'drink' ? item.sizes[selectedSize] : item.price;
+                    currentPrice = item.discountPrice || ((item.sizes && selectedSize) ? item.sizes[selectedSize] : item.price);
                     priceDisplay.textContent = formatPrice(currentPrice * quantity);
                     if (!priceDisplay.classList.contains('price-flash-animation')) {
                         priceDisplay.classList.add('price-flash-animation');
@@ -620,7 +737,7 @@
                 };
 
                 let sizeOptionsHTML = '';
-                if(item.type === 'drink') {
+                if(item.type === 'drink' && item.sizes) {
                     sizeOptionsHTML = `
                         <div>
                             <h3 class="font-semibold mb-2">Size</h3>
@@ -630,7 +747,7 @@
                 }
 
                 let drinkOptionsHTML = '';
-                if(item.type === 'drink') {
+                if(item.type === 'drink' && item.category !== 'Soft Drinks') {
                     drinkOptionsHTML = `
                         <div>
                             <h3 class="font-semibold mb-2">Sugar Level</h3>
@@ -710,7 +827,7 @@
                     });
                 });
 
-                if (item.type === 'drink') {
+                if (item.type === 'drink' && item.sizes) {
                     const sizeOptions = itemDetailModalContent.querySelector('#size-options');
                     sizeOptions.querySelector(`[data-value="${selectedSize}"]`).classList.add('active');
                     sizeOptions.addEventListener('click', e => {
@@ -721,7 +838,9 @@
                             updatePriceAndButton();
                         }
                     });
-
+                }
+                
+                if(item.type === 'drink' && item.category !== 'Soft Drinks') {
                     const sugarOptions = itemDetailModalContent.querySelector('#sugar-options');
                     sugarOptions.querySelector(`[data-value="${selectedSugar}"]`).classList.add('active');
                     sugarOptions.addEventListener('click', e => {
@@ -758,8 +877,8 @@
                         const newInstructions = itemDetailModalContent.querySelector('#special-instructions').value;
                         const customizations = {
                             size: selectedSize,
-                            sugar: item.type === 'drink' ? selectedSugar : null,
-                            ice: item.type === 'drink' ? selectedIce : null,
+                            sugar: (item.type === 'drink' && item.category !== 'Soft Drinks') ? selectedSugar : null,
+                            ice: (item.type === 'drink' && item.category !== 'Soft Drinks') ? selectedIce : null,
                         };
                         addToCart(item, customizations, quantity, newInstructions, !!existingCartItem, existingCartItem?.id);
                         closeModal(itemDetailModal);
@@ -803,6 +922,19 @@
             
             drinksTab.addEventListener('click', () => switchTab('drinks'));
             foodTab.addEventListener('click', () => switchTab('food'));
+
+            const switchFeaturedTab = (newFeaturedTab) => {
+                currentFeaturedTab = newFeaturedTab;
+                const tabs = { popular: popularTab, deals: dealsTab };
+                Object.keys(tabs).forEach(key => {
+                    tabs[key].classList.remove('bg-white', 'shadow');
+                });
+                tabs[newFeaturedTab].classList.add('bg-white', 'shadow');
+                renderFeaturedCarousel(currentFeaturedTab);
+            };
+
+            popularTab.addEventListener('click', () => switchFeaturedTab('popular'));
+            dealsTab.addEventListener('click', () => switchFeaturedTab('deals'));
 
             viewCartBtn.addEventListener('click', () => { renderCart(); openModal(cartModal); });
             checkoutBtn.addEventListener('click', () => { 
@@ -908,27 +1040,71 @@
                         }
                         document.body.removeChild(textArea);
                     });
-                } else {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = receiptText;
-                    document.body.appendChild(textArea);
-                    textArea.focus();
-                    textArea.select();
-                    try {
-                        document.execCommand('copy');
-                        showToast('Receipt copied to clipboard!');
-                    } catch (err) {
-                        showToast('Could not copy receipt.');
-                    }
-                    document.body.removeChild(textArea);
                 }
             });
             
             // --- INITIALIZATION ---
+            async function fetchAndInitializeApp() {
+                try {
+                    const response = await fetch('https://raw.githubusercontent.com/Lorheng/muycafe/refs/heads/main/menu.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    
+                    // Process data into the menu object
+                    const processedData = data.map(item => {
+                        const newItem = {...item};
+                        // Clean up escaped keys from some JSON converters
+                        for (const key in newItem) {
+                            if (key.includes('\\')) {
+                                const newKey = key.replace(/\\/g, '');
+                                newItem[newKey] = newItem[key];
+                                delete newItem[key];
+                            }
+                        }
+
+                        if(newItem.sizes_S || newItem.sizes_M || newItem.sizes_L) {
+                            newItem.sizes = {};
+                            if(newItem.sizes_S) newItem.sizes['S'] = parseFloat(newItem.sizes_S);
+                            if(newItem.sizes_M) newItem.sizes['M'] = parseFloat(newItem.sizes_M);
+                            if(newItem.sizes_L) newItem.sizes['L'] = parseFloat(newItem.sizes_L);
+                        }
+                        if(newItem.price) newItem.price = parseFloat(newItem.price);
+                        if(newItem.discountPrice) newItem.discountPrice = parseFloat(newItem.discountPrice);
+                        return newItem;
+                    });
+
+                    menu.drinks = processedData.filter(item => item.type.toLowerCase() === 'drink');
+                    menu.food = processedData.filter(item => item.type.toLowerCase() === 'food');
+
+                    initApp();
+                } catch (error) {
+                    console.error("Could not fetch or process menu data:", error);
+                    document.getElementById('error-message').classList.remove('hidden');
+                    skeletonLoader.style.display = 'none';
+                }
+            }
+
             const initApp = () => {
+                const welcomeHeader = document.getElementById('welcome-header');
+                const hour = new Date().getHours();
+                if (hour < 12) {
+                    welcomeHeader.textContent = 'Good Morning!';
+                } else if (hour < 18) {
+                    welcomeHeader.textContent = 'Good Afternoon!';
+                } else {
+                    welcomeHeader.textContent = 'Good Evening!';
+                }
+                
                 renderAllSections();
-                switchTab('drinks');
                 updateCartBar();
+                
+                skeletonLoader.style.display = 'none';
+                mainContent.style.opacity = '1';
+
+                setupScrollAnimations(mainContent);
+                setupScrollAnimations(featuredCarousel);
             };
 
             if (window.Telegram && window.Telegram.WebApp) {
@@ -936,7 +1112,7 @@
                 Telegram.WebApp.setHeaderColor('#F3F4F6');
                 Telegram.WebApp.setBackgroundColor('#F3F4F6');
             }
-            initApp();
+            fetchAndInitializeApp();
         });
     </script>
 
