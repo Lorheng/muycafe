@@ -1,0 +1,247 @@
+[
+  {
+    "key": "welcome_morning",
+    "en": "Good Morning!",
+    "km": "អរុណសួស្តី!"
+  },
+  {
+    "key": "welcome_afternoon",
+    "en": "Good Afternoon!",
+    "km": "ជំរាបសួរពេលរសៀល!"
+  },
+  {
+    "key": "welcome_evening",
+    "en": "Good Evening!",
+    "km": "រាត្រីសួស្តី!"
+  },
+  {
+    "key": "deals_tab",
+    "en": "Today's Deals",
+    "km": "កិច្ចព្រមព្រៀងថ្ងៃនេះ"
+  },
+  {
+    "key": "popular_tab",
+    "en": "Popular",
+    "km": "ពេញនិយម"
+  },
+  {
+    "key": "drinks_tab",
+    "en": "Drinks",
+    "km": "ភេសជ្ជៈ"
+  },
+  {
+    "key": "food_tab",
+    "en": "Food",
+    "km": "អាហារ"
+  },
+  {
+    "key": "search_placeholder",
+    "en": "Search menu...",
+    "km": "ស្វែងរកមុខម្ហូប..."
+  },
+  {
+    "key": "search_cancel",
+    "en": "Cancel",
+    "km": "បោះបង់"
+  },
+  {
+    "key": "no_items_found",
+    "en": "No items found.",
+    "km": "រកមិនឃើញធាតុ។"
+  },
+  {
+    "key": "quantity",
+    "en": "Quantity",
+    "km": "បរិមាណ"
+  },
+  {
+    "key": "size",
+    "en": "Size",
+    "km": "ទំហំ"
+  },
+  {
+    "key": "sugar_level",
+    "en": "Sugar Level",
+    "km": "កម្រិតស្ករ"
+  },
+  {
+    "key": "ice_level",
+    "en": "Ice Level",
+    "km": "កម្រិតទឹកកក"
+  },
+  {
+    "key": "special_instructions",
+    "en": "Special Instructions",
+    "km": "ការណែនាំពិសេស"
+  },
+  {
+    "key": "instructions_placeholder",
+    "en": "e.g. extra caramel...",
+    "km": "ឧទាហរណ៍ ការ៉ាមែលបន្ថែម..."
+  },
+  {
+    "key": "nutrition_allergens",
+    "en": "Nutrition & Allergens",
+    "km": "អាហារូបត្ថម្ភ និងសារធាតុបង្កអាលែកហ្ស៊ី"
+  },
+  {
+    "key": "add_to_cart",
+    "en": "Add to Cart",
+    "km": "បន្ថែមទៅរទេះ"
+  },
+  {
+    "key": "update_item",
+    "en": "Update Item",
+    "km": "ធ្វើបច្ចុប្បន្នភាពធាតុ"
+  },
+  {
+    "key": "unavailable",
+    "en": "Temporarily Unavailable",
+    "km": "មិនមានជាបណ្តោះអាសន្ន"
+  },
+  {
+    "key": "your_cart",
+    "en": "Your Cart",
+    "km": "រទេះរបស់អ្នក"
+  },
+  {
+    "key": "cart_empty",
+    "en": "Your cart is empty.",
+    "km": "រទេះរបស់អ្នកទទេ"
+  },
+  {
+    "key": "edit_button",
+    "en": "Edit",
+    "km": "កែសម្រួល"
+  },
+  {
+    "key": "subtotal",
+    "en": "Subtotal",
+    "km": "តម្លៃសរុប"
+  },
+  {
+    "key": "total",
+    "en": "Total",
+    "km": "សរុប"
+  },
+  {
+    "key": "empty_cart",
+    "en": "Empty Cart",
+    "km": "ជម្រះរទេះ"
+  },
+  {
+    "key": "checkout",
+    "en": "Proceed to Checkout",
+    "km": "ទៅកាន់ការទូទាត់"
+  },
+  {
+    "key": "confirm_title",
+    "en": "Are you sure?",
+    "km": "តើអ្នកប្រាកដទេ?"
+  },
+  {
+    "key": "confirm_empty_cart",
+    "en": "Are you sure you want to remove all items?",
+    "km": "តើអ្នកប្រាកដជាចង់លុបធាតុទាំងអស់មែនទេ?"
+  },
+  {
+    "key": "confirm_button",
+    "en": "Confirm",
+    "km": "បញ្ជាក់"
+  },
+  {
+    "key": "cancel_button",
+    "en": "Cancel",
+    "km": "បោះបង់"
+  },
+  {
+    "key": "order_placed",
+    "en": "Order Placed!",
+    "km": "ការបញ្ជាទិញបានដាក់!"
+  },
+  {
+    "key": "order_number",
+    "en": "Order",
+    "km": "លេខ​បញ្ជាទិញ"
+  },
+  {
+    "key": "total_to_pay",
+    "en": "Total to Pay",
+    "km": "ទឹកប្រាក់សរុបដែលត្រូវបង់"
+  },
+  {
+    "key": "pickup_time_message",
+    "en": "Your order will be ready in 10-15 minutes.",
+    "km": "ការបញ្ជាទិញរបស់អ្នកនឹងរួចរាល់ក្នុងរយៈពេល ១០-១៥ នាទី។"
+  },
+  {
+    "key": "payment_instruction",
+    "en": "Please show this receipt at the counter to pay.",
+    "km": "សូមបង្ហាញបង្កាន់ដៃនេះនៅបញ្ជរដើម្បីទូទាត់។"
+  },
+  {
+    "key": "share_button",
+    "en": "Share",
+    "km": "ចែករំលែក"
+  },
+  {
+    "key": "new_order_button",
+    "en": "New Order",
+    "km": "ការបញ្ជាទិញថ្មី"
+  },
+  {
+    "key": "toast_copied",
+    "en": "Receipt copied to clipboard!",
+    "km": "ចម្លងបង្កាន់ដៃទៅក្ដារតម្បៀតខ្ទាស់ហើយ!"
+  },
+  {
+    "key": "toast_copy_failed",
+    "en": "Could not copy receipt.",
+    "km": "មិនអាចចម្លងបង្កាន់ដៃបានទេ។"
+  },
+  {
+    "key": "category_hot",
+    "en": "HOT",
+    "km": "ក្តៅ"
+  },
+  {
+    "key": "category_ice",
+    "en": "ICE",
+    "km": "ទឹកកក"
+  },
+  {
+    "key": "category_cream_series",
+    "en": "Cream Series",
+    "km": "ស៊េរីគ្រីម"
+  },
+  {
+    "key": "category_milk",
+    "en": "Milk",
+    "km": "ទឹកដោះគោ"
+  },
+  {
+    "key": "category_soda",
+    "en": "Soda",
+    "km": "សូដា"
+  },
+  {
+    "key": "category_tea",
+    "en": "Tea",
+    "km": "តែ"
+  },
+  {
+    "key": "category_soft_drink",
+    "en": "Soft Drink",
+    "km": "ភេសជ្ជៈ"
+  },
+  {
+    "key": "category_rice_dishes",
+    "en": "Rice Dishes",
+    "km": "មុខម្ហូបបាយ"
+  },
+  {
+    "key": "category_noodles_soup",
+    "en": "Noodles & Soup",
+    "km": "គុយទាវ & ស៊ុប"
+  }
+]

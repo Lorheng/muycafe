@@ -1,0 +1,41 @@
+[
+  {
+    "promo_id": "p1",
+    "promo_type": "bogo",
+    "promo_tag": "Buy 2, Get 1 Free",
+    "promo_tag_km": "ទិញ 2 ថែម 1",
+    "store_id": "store2",
+    "applies_to_category": "Coffee",
+    "buy_qty": 2,
+    "get_qty": 3,
+    "exclude_ids": "d12,d15",
+    "start_date": "2025-07-01",
+    "end_date": "2025-07-31"
+  },
+  {
+    "promo_id": "p2",
+    "promo_type": "bogo",
+    "promo_tag": "BOGO Drinks!",
+    "promo_tag_km": "ទិញ 1 ថែម 1",
+    "store_id": "all",
+    "applies_to_category": "drink",
+    "buy_qty": 1,
+    "get_qty": 2,
+    "exclude_ids": "",
+    "start_date": "",
+    "end_date": ""
+  },
+  {
+    "promo_id": "p3",
+    "promo_type": "discount",
+    "promo_tag": "20% OFF Pastries",
+    "promo_tag_km": "",
+    "store_id": "store2",
+    "applies_to_category": "Pastries",
+    "buy_qty": "",
+    "get_qty": "",
+    "exclude_ids": "",
+    "start_date": "",
+    "end_date": ""
+  }
+]

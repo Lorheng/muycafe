@@ -1,0 +1,32 @@
+[
+  {
+    "store_id": "store1",
+    "name": "AEON 2",
+    "name_km": "សាខា​ អ៉ីអន២",
+    "address": "Sen Sok City, Phnom Penh",
+    "address_km": "ខណ្ឌសែនសុខ រាជធានីភ្នំពេញ",
+    "phone": "093 313 413",
+    "hours": "6 AM - 3PM",
+    "telegram_link": "https://t.me/muysochenda",
+    "gmap_link": "https://maps.app.goo.gl/kDC9W1XpSjCNcZoW7",
+    "facebook_link": "https://www.facebook.com/share/16zg1cgZCh/?mibextid=wwXIfr",
+    "instagram_link": "https://www.instagram.com/muy.cafe?igsh=MXRjdzZ4ZnlodzI1dQ==",
+    "tiktok_link": "https://www.tiktok.com/@muy.cafe?_t=ZS-8xz2WsSCxMX&_r=1",
+    "opening_date": "2022-01-31"
+  },
+  {
+    "store_id": "store2",
+    "name": "Chhouk Va 2",
+    "name_km": "សាខា​ ឈូកវ៉ា២",
+    "address": "Krang Thnong, Sen Sok, Phnom Penh",
+    "address_km": "ក្រាំងធ្នង់ ខណ្ឌសែនសុខ រាជធានីភ្នំពេញ",
+    "phone": "070 561 069",
+    "hours": "6 AM - 3PM",
+    "telegram_link": "https://t.me/muysochenda",
+    "gmap_link": "https://maps.app.goo.gl/bbaQDs5VArL5zsL39",
+    "facebook_link": "https://www.facebook.com/share/16zg1cgZCh/?mibextid=wwXIfr",
+    "instagram_link": "https://www.instagram.com/muy.cafe?igsh=MXRjdzZ4ZnlodzI1dQ==",
+    "tiktok_link": "https://www.tiktok.com/@muy.cafe?_t=ZS-8xz2WsSCxMX&_r=1",
+    "opening_date": "2025-06-30"
+  }
+]
