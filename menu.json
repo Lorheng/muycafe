@@ -5,7 +5,7 @@
     "name_khm": "អាមេរិចកាណូ",
     "description": "A coffee-based drink made by diluting espresso with hot water.",
     "description_km": "ភេសជ្ជៈដែលមានមូលដ្ឋានលើកាហ្វេដែលធ្វើឡើងដោយពនឺ espresso ជាមួយទឹកក្តៅ។",
-    "image": "https://github.com/Lorheng/muycafe/blob/main/images/Gen_HOT_Americano.png?raw=true",
+    "image": "https://raw.githubusercontent.com/Lorheng/muycafe/refs/heads/main/images/Gen_HOT_Americano.webp",
     "type": "drink",
     "category": "HOT",
     "sizes\\_S": "",
