@@ -28,5 +28,35 @@
     "instagram_link": "https://www.instagram.com/muy.cafe?igsh=MXRjdzZ4ZnlodzI1dQ==",
     "tiktok_link": "https://www.tiktok.com/@muy.cafe?_t=ZS-8xz2WsSCxMX&_r=1",
     "opening_date": "2025-06-30"
+  },
+  {
+    "store_id": "store3",
+    "name": "Chamka Doung",
+    "name_km": "សាខា ចម្ការដូង",
+    "address": "Next to Park, St 7, Phnom Penh 120501",
+    "address_km": "ខណ្ឌចម្ការដូង",
+    "phone": "070 766 761",
+    "hours": "6:30 AM - 5 PM",
+    "telegram_link": "https://t.me/muysochenda",
+    "gmap_link": "https://maps.app.goo.gl/wnPLqZtxjaq71GZw8",
+    "facebook_link": "https://www.facebook.com/share/16zg1cgZCh/?mibextid=wwXIfr",
+    "instagram_link": "https://www.instagram.com/muy.cafe?igsh=MXRjdzZ4ZnlodzI1dQ==",
+    "tiktok_link": "https://www.tiktok.com/@muy.cafe?_t=ZS-8xz2WsSCxMX&_r=1",
+    "opening_date": "2026-01-01"
+  },
+  {
+    "store_id": "store4",
+    "name": "Condo SenSok",
+    "name_km": "សាខា​ ខុនដូរ សែនសុខ",
+    "address": "JR8R+5M7, Street Depok, Phnom Penh 12453",
+    "address_km": "ខណ្ឌសែនសុខ រាជធានីភ្នំពេញ",
+    "phone": "070 766 761",
+    "hours": "6:30 AM - 5 PM",
+    "telegram_link": "https://t.me/muysochenda",
+    "gmap_link": "https://maps.app.goo.gl/aGDyjvK7Z16d5qQh7",
+    "facebook_link": "https://www.facebook.com/share/16zg1cgZCh/?mibextid=wwXIfr",
+    "instagram_link": "https://www.instagram.com/muy.cafe?igsh=MXRjdzZ4ZnlodzI1dQ==",
+    "tiktok_link": "https://www.tiktok.com/@muy.cafe?_t=ZS-8xz2WsSCxMX&_r=1",
+    "opening_date": "2026-03-31"
   }
 ]
