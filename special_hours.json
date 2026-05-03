@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "sh2",
+    "store_id": "store5",
+    "start_date": "2024-01-01",
+    "end_date": "2030-12-31",
+    "is_closed": "TRUE",
+    "special_hours": "",
+    "reason_en": "Openning Soon!",
+    "reason_km": "ឆាប់ៗនេះ! Joy"
+  }
+]
