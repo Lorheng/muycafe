@@ -58,5 +58,20 @@
     "instagram_link": "https://www.instagram.com/muy.cafe?igsh=MXRjdzZ4ZnlodzI1dQ==",
     "tiktok_link": "https://www.tiktok.com/@muy.cafe?_t=ZS-8xz2WsSCxMX&_r=1",
     "opening_date": "2026-03-31"
+  },
+  {
+    "store_id": "store5",
+    "name": "Coming Soon",
+    "name_km": "សាខាថ្មី ឆាប់ៗនេះ",
+    "address": "Location to be announced",
+    "address_km": "ទីតាំងនឹងប្រកាសឆាប់ៗនេះ",
+    "phone": "N/A",
+    "hours": "00:00 - 00:00",
+    "telegram_link": "",
+    "gmap_link": "",
+    "facebook_link": "",
+    "instagram_link": "",
+    "tiktok_link": "",
+    "opening_date": ""
   }
 ]
