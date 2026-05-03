@@ -340,11 +340,20 @@ let cart=[], selItem=null, mqv=1, selSz=null, selSugar=null, selIce=null;
 let curCat='all', searchQ='';
 let recentlyViewed=[];
 let scrollSpy=null;
+const cachedImgs=new Set();
 
 // ═══ HELPERS ═══
 const $=id=>document.getElementById(id);
 function t(k){return TR[k]?.[lang]??TR[k]?.en??k}
 function haptic(type='light'){try{Telegram?.WebApp?.HapticFeedback?.impactOccurred(type)}catch{}}
+function imgLoaded(el){el.classList.add('loaded');cachedImgs.add(el.src)}
+function optImg(url){
+  if(!url) return '';
+  if(url.includes('github.com') || url.includes('githubusercontent')){
+    return `https://wsrv.nl/?url=${encodeURIComponent(url.replace('https://',''))}&w=300&output=webp&q=75`;
+  }
+  return url;
+}
 function fmt(v){
   if(v===null||v===undefined||v==='')return '';
   v=parseFloat(v);if(isNaN(v))return '';
@@ -662,9 +671,11 @@ function renderFeatured(){
   $('feat-sec').style.display='';
   $('feat-row').innerHTML=items.map(item=>{
     const d=discOf(item),sz=getSizes(item),bp=baseP(item),minP=sz.length?sz[0].p:bp;
+    const imgUrl = optImg(item.image);
+    const isLd = cachedImgs.has(imgUrl) ? 'loaded' : '';
     return`<div class="fcard" onclick="openItem('${item.id}')">
       <div class="fcard-img-wrap">
-        <img class="fcard-img" src="${item.image}" alt="${iName(item)}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+        <img class="fcard-img ${isLd}" src="${imgUrl}" alt="${iName(item)}" loading="lazy" onload="imgLoaded(this)" onerror="this.style.display='none'">
       </div>
       <div class="fcard-body">
         <div class="fcard-name">${iName(item)}</div>
@@ -687,8 +698,10 @@ function renderRecentlyViewed(){
   $('rv-lbl').textContent=t('recently');
   $('rv-row').innerHTML=recentlyViewed.map(item=>{
     const d=discOf(item),sz=getSizes(item),bp=baseP(item),p=d?d.price:(sz.length?sz[0].p:bp);
+    const imgUrl = optImg(item.image);
+    const isLd = cachedImgs.has(imgUrl) ? 'loaded' : '';
     return`<div class="rv-card" onclick="openItem('${item.id}')">
-      <img class="rv-img" src="${item.image}" alt="" loading="lazy" onerror="this.style.background='var(--bg)'">
+      <img class="rv-img ${isLd}" src="${imgUrl}" alt="" loading="lazy" onload="imgLoaded(this)" onerror="this.style.background='var(--bg)'">
       <div style="min-width:0">
         <div class="rv-name">${iName(item)}</div>
         <div class="rv-price">${fmt(p)}</div>
@@ -807,9 +820,11 @@ function cardHTML(item){
 
   const fromLabel=sz.length>1&&!d?`<span style="font-size:10px;color:var(--fg3)">${t('from')} </span>`:'';
   const priceStr=d?`<span class="mcard-price">${fmt(d.price)}</span><span class="mcard-og">${fmt(minP)}</span>`:`<span class="mcard-price">${fromLabel}${fmt(minP)}</span>`;
+  const imgUrl = optImg(item.image);
+  const isLd = cachedImgs.has(imgUrl) ? 'loaded' : '';
   return`<div class="mcard" id="mc-${item.id}" onclick="openItem('${item.id}')">
     <div class="mcard-img-wrap">
-      <img class="mcard-img" src="${item.image}" alt="${iName(item)}" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+      <img class="mcard-img ${isLd}" src="${imgUrl}" alt="${iName(item)}" loading="lazy" onload="imgLoaded(this)" onerror="this.style.display='none'">
       ${d&&d.tag?`<div class="mcard-ptag">${d.tag}</div>`:''}
       ${!tc.ok?`<div class="mcard-dim">${tc.msg}</div>`:''}
       <div class="mcard-incart${inCart?' vis':''}" id="ic-${item.id}">${inCart}</div>
@@ -834,8 +849,12 @@ function openItem(id){
   const sz=getSizes(item),d=discOf(item),bp=baseP(item);
   if(sz.length)selSz=sz[0];
   const effP=selSz?selSz.p:bp;
-  $('m-img').classList.remove('loaded');
-  $('m-img').src=item.image;
+  
+  const imgUrl = optImg(item.image);
+  $('m-img').className = 'm-img ' + (cachedImgs.has(imgUrl) ? 'loaded' : '');
+  $('m-img').onload = function(){ imgLoaded(this); };
+  $('m-img').src=imgUrl;
+  
   $('m-name').textContent=iName(item);
   $('m-desc').textContent=iDesc(item)||'';
   $('m-price').textContent=fmt(d?d.price:effP);
@@ -1105,11 +1124,14 @@ function renderCart(){
         priceHtml = `<div class="ci-p"><span style="color:var(--fg3);text-decoration:line-through;margin-right:4px;font-size:11px">${fmt(lineTotal)}</span><span style="color:var(--green)">${fmt(finalPrice)}</span></div>`;
     }
     
+    const imgUrl = optImg(c.item.image);
+    const isLd = cachedImgs.has(imgUrl) ? 'loaded' : '';
+
     return `
     <div class="ci-wrap" id="ciw-${i}">
       <div class="ci-del-bg">🗑 Delete</div>
       <div class="ci">
-        <img class="ci-img" src="${c.item.image}" alt="" loading="lazy" onload="this.classList.add('loaded')" onerror="this.style.display='none'">
+        <img class="ci-img ${isLd}" src="${imgUrl}" alt="" loading="lazy" onload="imgLoaded(this)" onerror="this.style.display='none'">
         <div class="ci-info">
           <div class="ci-name">${iName(c.item)}</div>
           ${custStr ? `<div class="ci-sub" style="margin-top:2px">${custStr}</div>` : ''}
